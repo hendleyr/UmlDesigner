@@ -5,7 +5,14 @@ import java.util.List;
 public class UmlMethodModel {
 	private AccessModifier _accessModifier;
 	private String _name;
-	private List<UmlVariableModel> _parameters;
+	private List<UmlAttributeModel> _parameters;
+	// NB: all parameters should have access modifier 'local'
+	
+	public UmlMethodModel(AccessModifier accessMod, String name, List<UmlAttributeModel> params) {
+		this._accessModifier = accessMod;
+		this._name = name;
+		this._parameters = params;
+	}
 	
 	public AccessModifier getAccessModifier() {
 		return _accessModifier;
@@ -19,10 +26,10 @@ public class UmlMethodModel {
 	public void setName(String name) {
 		this._name = name;
 	}
-	public List<UmlVariableModel> getParameters() {
+	public List<UmlAttributeModel> getParameters() {
 		return _parameters;
 	}
-	public void setParameters(List<UmlVariableModel> parameters) {
+	public void setParameters(List<UmlAttributeModel> parameters) {
 		this._parameters = parameters;
 	}
 }
