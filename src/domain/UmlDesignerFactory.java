@@ -1,3 +1,4 @@
+package domain;
 
 
 import org.jhotdraw.xml.DefaultDOMFactory;

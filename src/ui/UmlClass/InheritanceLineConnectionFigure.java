@@ -1,14 +1,15 @@
 package ui.UmlClass;
 
-//TODO: rework to new framework
-import ClassFigure;
-import JModellerClass;
-
 import java.awt.Color;
 
+import org.jhotdraw.draw.AttributeKeys;
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.LineConnectionFigure;
+import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+
+import domain.UmlClass.AssociationType;
+import domain.UmlClass.UmlClassModel;
 
 /**
  * An InheritanceLineConnection is a graphical representation for
@@ -23,11 +24,15 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
      * Create a new instance with a predefined arrow
      */
     public InheritanceLineConnectionFigure() {
-        setStartDecoration(null);
+        //setStartDecoration(null);
+    	set(AttributeKeys.START_DECORATION, null);
         ArrowTip arrow = new ArrowTip(0.35, 20.0 , 20.0);
-        arrow.setFillColor(Color.white);
-        arrow.setBorderColor(Color.black);
-        setEndDecoration(arrow);
+        set(AttributeKeys.FILL_COLOR, Color.white);
+        set(AttributeKeys.STROKE_COLOR, Color.black);
+//        arrow.setFillColor(Color.white);
+//        arrow.setBorderColor(Color.black);
+        //setEndDecoration(arrow);
+        set(AttributeKeys.END_DECORATION, arrow);
     }
         
     /**
@@ -35,13 +40,14 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
      * a template method. This method is called when a
      * connection between two objects has been established.
      */
-    protected void handleConnect(Figure start, Figure end) {
+    protected void handleConnect(Connector start, Connector end) {
         super.handleConnect(start, end);
 
-        JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-        JModellerClass endClass = ((ClassFigure)end).getModellerClass();
+        UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+        UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
 
-        startClass.addSuperclass(endClass);
+        //startClass.addSuperclass(endClass);
+        startClass.addAssociation(endClass, AssociationType.Inheritance);
     }
 
     /**
@@ -49,18 +55,19 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
      * a template method. This method is called when a 
      * connection between two objects has been cancelled.
      */
-    protected void handleDisconnect(Figure start, Figure end) {
+    protected void handleDisconnect(Connector start, Connector end) {
         super.handleDisconnect(start, end);
         if ((start != null) && (end!= null)) {
-            JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-            JModellerClass endClass = ((ClassFigure)end).getModellerClass();
-            startClass.removeSuperclass(endClass);
+        	UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+        	UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+            //startClass.removeSuperclass(endClass);
+            startClass.removeAssociation(endClass);
         }
     }
 
     /**
      * Test whether an inheritance relationship between two ClassFigures can
-     * be established. An inheritance relationshop can be established if
+     * be established. An inheritance relationship can be established if
      * there is no cyclic inheritance graph. This method is called before
      * the two classes are connected in the diagram.
      *
@@ -69,8 +76,8 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
      * @return  true, if an inheritance relationship can be established, false otherwise
      */
     public boolean canConnect(Figure start, Figure end) {
-        JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-        JModellerClass endClass = ((ClassFigure)end).getModellerClass();
+        UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+        UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
 
         return !endClass.hasInheritanceCycle(startClass);
     }

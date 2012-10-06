@@ -6,9 +6,14 @@ package ui.UmlClass;
 //import CH.ifa.draw.framework.Figure;
 import java.awt.Graphics;
 
+import org.jhotdraw.draw.AttributeKeys;
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.LineConnectionFigure;
+import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+
+import domain.UmlClass.AssociationType;
+import domain.UmlClass.UmlClassModel;
 
 /**
  * Draw a dependency line between two classes. A dependency relation is a
@@ -26,12 +31,11 @@ public class DependencyLineConnectionFigure extends LineConnectionFigure {
      */
     public DependencyLineConnectionFigure() {
         super();
-
-        setStartDecoration(null);
+        set(AttributeKeys.START_DECORATION, null);
         ArrowTip arrow = new ArrowTip(0.4, 12.0, 0.0);
-        arrow.setBorderColor(java.awt.Color.black);
-        setEndDecoration(arrow);
-        setEndDecoration(arrow);
+        
+        set(AttributeKeys.STROKE_COLOR, java.awt.Color.black);
+        set(AttributeKeys.END_DECORATION, arrow);
     }
 
     /**
@@ -42,13 +46,13 @@ public class DependencyLineConnectionFigure extends LineConnectionFigure {
      * @param start figure representing the start class which is dependend on the end class
      * @param end   figure representing the end class
      */
-    protected void handleConnect(Figure start, Figure end) {
+    protected void handleConnect(Connector start, Connector end) {
         super.handleConnect(start, end);
 
-        JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-        JModellerClass endClass = ((ClassFigure)end).getModellerClass();
+        UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+        UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
 
-        startClass.addDependency(endClass);
+        startClass.addAssociation(endClass, AssociationType.Dependency);
     }
 
     /**
@@ -59,12 +63,12 @@ public class DependencyLineConnectionFigure extends LineConnectionFigure {
      * @param start figure representing the start class which is dependend on the end class
      * @param end   figure representing the end class
      */
-    protected void handleDisconnect(Figure start, Figure end) {
+    protected void handleDisconnect(Connector start, Connector end) {
         super.handleDisconnect(start, end);
         if ((start != null) && (end!= null)) {
-            JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-            JModellerClass endClass = ((ClassFigure)end).getModellerClass();
-            startClass.removeDependency(endClass);
+            UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+            UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+            startClass.removeAssociation(endClass);
         }
     }
 
@@ -81,6 +85,7 @@ public class DependencyLineConnectionFigure extends LineConnectionFigure {
      * @param x2 end x point
      * @param y2 end y point
      */
+    //TODO: we want to supply the framework with a liner that mimics this method
     protected void drawLine(Graphics g, int x1, int y1, int x2, int y2) {
         int xDistance = x2 - x1;
         int yDistance = y2 - y1;

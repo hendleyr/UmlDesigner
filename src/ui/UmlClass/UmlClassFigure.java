@@ -12,7 +12,7 @@ import domain.UmlClass.UmlClassModel;
 
 
 @SuppressWarnings("serial")
-public class ClassFigure extends GraphicalCompositeFigure {
+public class UmlClassFigure extends GraphicalCompositeFigure {
 	private UmlClassModel model;
 	
     public UmlClassModel getModellerClass() {
@@ -45,7 +45,7 @@ public class ClassFigure extends GraphicalCompositeFigure {
     /**
      * Create a new instance of ClassFigure with a RectangleFigure as presentation figure
      */    
-    public ClassFigure() {
+    public UmlClassFigure() {
         this(new RectangleFigure());
     }
 
@@ -54,7 +54,7 @@ public class ClassFigure extends GraphicalCompositeFigure {
      *
      * @param newPresentationFigure presentation figure
      */    
-    public ClassFigure(Figure newPresentationFigure) {
+    public UmlClassFigure(Figure newPresentationFigure) {
         super(newPresentationFigure);
     }
     
@@ -78,33 +78,32 @@ public class ClassFigure extends GraphicalCompositeFigure {
             public void setText(String newText) {
                 super.setText(newText);
                 getModellerClass().setName(newText);
-                update();
+                //update();
             }
         });
-        getClassNameFigure().setFont(new Font("Helvetica", Font.BOLD, 12));
+        //getClassNameFigure().setFont(new Font("Helvetica", Font.BOLD, 12));
         getClassNameFigure().setText(getModellerClass().getName());
         
         // add the TextFigure to the Composite
         GraphicalCompositeFigure nameFigure = new GraphicalCompositeFigure(new SeparatorFigure());
         nameFigure.add(getClassNameFigure());
-        nameFigure.getLayouter().setInsets(new Insets(0, 4, 0, 0));
+        //nameFigure.getLayouter().setInsets(new Insets(0, 4, 0, 0));
         add(nameFigure);
 
         // create a figure responsible for maintaining attributes
         setAttributesFigure(new GraphicalCompositeFigure(new SeparatorFigure()));
-        getAttributesFigure().getLayouter().setInsets(new Insets(4, 4, 4, 0));
+        //getAttributesFigure().getLayouter().setInsets(new Insets(4, 4, 4, 0));
         // add the figure to the Composite
         add(getAttributesFigure());
 
         // create a figure responsible for maintaining methods
         setMethodsFigure(new GraphicalCompositeFigure(new SeparatorFigure()));
-        getMethodsFigure().getLayouter().setInsets(new Insets(4, 4, 4, 0));
+        //getMethodsFigure().getLayouter().setInsets(new Insets(4, 4, 4, 0));
         // add the figure to the Composite
         add(getMethodsFigure());
 
-        setAttribute(Figure.POPUP_MENU, createPopupMenu());
-
-        super.initialize();
+        //setAttribute(Figure.POPUP_MENU, createPopupMenu());
+        //super.initialize();
     }
     
     /**

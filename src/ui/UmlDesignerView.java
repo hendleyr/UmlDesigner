@@ -1,7 +1,5 @@
 package ui;
 
-import UmlDesignerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -18,8 +16,9 @@ import org.jhotdraw.draw.io.ImageOutputFormat;
 import org.jhotdraw.draw.io.InputFormat;
 import org.jhotdraw.draw.io.OutputFormat;
 import org.jhotdraw.gui.URIChooser;
-import org.jhotdraw.samples.pert.PertFactory;
 import org.jhotdraw.undo.UndoRedoManager;
+
+import domain.UmlDesignerFactory;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 

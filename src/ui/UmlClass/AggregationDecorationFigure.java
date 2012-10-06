@@ -1,13 +1,8 @@
 package ui.UmlClass;
 
-//import CH.ifa.draw.figures.AbstractLineDecoration;
-//import CH.ifa.draw.figures.FigureAttributes;
-//import CH.ifa.draw.util.*;
 //TODO: update to new framework
 import java.awt.*;
 import java.awt.geom.Path2D.Double;
-import java.io.*;
-
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.decoration.AbstractLineDecoration;
 
@@ -40,9 +35,9 @@ public class AggregationDecorationFigure extends AbstractLineDecoration {
      * @param newSize size of the diamond
      */
     public AggregationDecorationFigure(int newSize) {
+    	// constants for super constructor
+    	super(true, true, true);
         setSize(newSize);
-        setFillColor(Color.white);
-        setBorderColor(Color.black);
     }
     
    /**
@@ -97,25 +92,8 @@ public class AggregationDecorationFigure extends AbstractLineDecoration {
         shape.addPoint(x1, y1);
         
         return shape;
-
     }
 
-    /**
-     * Stores the arrow tip to a StorableOutput.
-     */
-    public void write(StorableOutput dw) {
-        super.write(dw);
-        dw.writeInt(getSize());
-    }
-    
-    /**
-     * Reads the arrow tip from a StorableInput.
-     */
-    public void read(StorableInput dr) throws IOException {
-        super.read(dr);
-        setSize(dr.readInt());
-    }
-    
     /**
      * Set the size of the diamond. The size is measured as diagonal line.
      *
@@ -137,12 +115,14 @@ public class AggregationDecorationFigure extends AbstractLineDecoration {
 	@Override
 	protected Double getDecoratorPath(Figure f) {
 		// TODO Auto-generated method stub
+		// copy the strategy from "outline" above
 		return null;
 	}
 
 	@Override
 	protected double getDecoratorPathRadius(Figure f) {
 		// TODO Auto-generated method stub
+		// try returning a constant > 0
 		return 0;
 	}
 }

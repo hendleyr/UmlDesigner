@@ -22,7 +22,7 @@ public class Main {
 		
 		DefaultApplicationModel model = new UmlDesignerApplicationModel();	//TODO: uml designer model
 		model.setName("UML Designer");
-		model.setVersion(Main.class.getPackage().getImplementationVersion());
+		//model.setVersion(Main.class.getPackage().getImplementationVersion());
 		model.setCopyright("Copyright 2006-2010 (c) by the authors of JHotDraw and all its contributors.\n"
 				+ "This software is licensed under LGPL and Creative Commons 3.0 Attribution.");
 		model.setViewClassName("org.jhotdraw.samples.pert.PertView");	// TODO:

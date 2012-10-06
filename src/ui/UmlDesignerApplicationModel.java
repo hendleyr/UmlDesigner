@@ -25,7 +25,8 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 	
 	@Override
     public ActionMap createActionMap(Application a, @Nullable View v) {
-		return null;// TODO:
+		return new ActionMap();
+		//return null;// TODO:
     }
     
 	/**

@@ -1,17 +1,15 @@
 package ui.UmlClass;
 
-//import CH.ifa.draw.framework.Figure;
-//import CH.ifa.draw.figures.LineConnection;
-//import CH.ifa.draw.figures.ArrowTip;
-//import CH.ifa.draw.framework.FigureChangeEvent;
-//import CH.ifa.draw.util.StorableInput;
-//TODO: rework to new framework
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 
-import org.jhotdraw.draw.Figure;
+import org.jhotdraw.draw.AttributeKeys;
+import org.jhotdraw.draw.LineConnectionFigure;
+import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+
+import domain.UmlClass.AssociationType;
+import domain.UmlClass.UmlClassModel;
 
 import java.io.*;
 
@@ -21,7 +19,7 @@ import java.io.*;
  * can either be bi-directional or uni-directional. An association can
  * be turned into an aggregation which can be regard a special kind of association.
  */
-public class AssociationLineConnectionFigure extends LineConnection {
+public class AssociationLineConnectionFigure extends LineConnectionFigure {
 
     /**
      * PopupMenu for an associations which allows to switch between
@@ -37,11 +35,14 @@ public class AssociationLineConnectionFigure extends LineConnection {
      */
     public AssociationLineConnectionFigure() {
         super();
-
-        setStartDecoration(null);
-        setEndDecoration(null);
+        
+        // we should be able to use the connectors set up in the super class
+//        setStartDecoration(null);
+//        setEndDecoration(null);
     
-        setAttribute(Figure.POPUP_MENU, createPopupMenu());
+        
+        // TODO: this is the old way of adding the popup menu
+        //setAttribute(Figure.POPUP_MENU, createPopupMenu());
     }
     
     /**
@@ -49,12 +50,15 @@ public class AssociationLineConnectionFigure extends LineConnection {
      * a template method. This method is called when a
      * connection between two objects has been established.
      */
-    protected void handleConnect(Figure start, Figure end) {
-        super.handleConnect(start, end);
-        JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-        JModellerClass endClass = ((ClassFigure)end).getModellerClass();
-        startClass.addAssociation(endClass);
-        endClass.addAssociation(startClass);
+    @Override
+    protected void handleConnect(Connector start, Connector end) {
+    	super.handleConnect(start, end);
+    	UmlClassModel startClass = ((UmlClassFigure)start.getOwner()).getModellerClass();
+    	UmlClassModel endClass = ((UmlClassFigure)end.getOwner()).getModellerClass();
+    	
+    	// TODO: strategy for determining the association type elegantly
+    	startClass.addAssociation(endClass, AssociationType.Dependency);
+    	endClass.addAssociation(startClass, AssociationType.Dependency);
     }
 
     /**
@@ -62,27 +66,30 @@ public class AssociationLineConnectionFigure extends LineConnection {
      * a template method. This method is called when a 
      * connection between two objects has been cancelled.
      */
-    protected void handleDisconnect(Figure start, Figure end) {
+    protected void handleDisconnect(Connector start, Connector end) {
         super.handleDisconnect(start, end);
+        // this could be an important check depending on how we do undo/redo
         if ((start != null) && (end!= null)) {
-            JModellerClass startClass = ((ClassFigure)start).getModellerClass();
-            JModellerClass endClass = ((ClassFigure)end).getModellerClass();
+        	UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
+        	UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
             startClass.removeAssociation(endClass);
             endClass.removeAssociation(startClass);
         }
     }
-
+    
     /**
      * Sets the named attribute to the new value.
      * Intercept to enable popup menus.
      */
     public void setAttribute(String name, Object value) {
-        if (name.equals(Figure.POPUP_MENU)) {
-            myPopupMenu = (JPopupMenu)value;
-        }
-        else {
-            super.setAttribute(name, value);
-        }
+        //TODO: it would be nice to have the pop-up menu working
+    	
+//    	if (name.equals(Figure.POPUP_MENU)) {
+//            myPopupMenu = (JPopupMenu)value;
+//        }
+//        else {
+//            super.setAttribute(name, value);
+//        }
     }
 
     /**
@@ -92,12 +99,14 @@ public class AssociationLineConnectionFigure extends LineConnection {
      * FillColor and FrameColor
      */
     public Object getAttribute(String name) {
-        if (name.equals(Figure.POPUP_MENU)) {
-            return myPopupMenu;
-        }
-        else {
-            return super.getAttribute(name);
-        }
+    	return null;
+    	//TODO:    	
+//        if (name.equals(Figure.POPUP_MENU)) {
+//            return myPopupMenu;
+//        }
+//        else {
+//            return super.getAttribute(name);
+//        }
     }
 
     /**
@@ -129,14 +138,15 @@ public class AssociationLineConnectionFigure extends LineConnection {
                     setUniDirectional(!isUniDirectional());
                     if (isUniDirectional()) {
                         ((JMenuItem)event.getSource()).setText("bi-directional");
-                        JModellerClass startClass = ((ClassFigure)startFigure()).getModellerClass();
-                        JModellerClass endClass = ((ClassFigure)endFigure()).getModellerClass();
-                        endClass.addAssociation(startClass);
+                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModellerClass();
+                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModellerClass();
+                        endClass.addAssociation(startClass, AssociationType.Dependency);
+                        			//TODO: determine assoc. type
                     }
                     else {
                         ((JMenuItem)event.getSource()).setText("uni-directional");
-                        JModellerClass startClass = ((ClassFigure)startFigure()).getModellerClass();
-                        JModellerClass endClass = ((ClassFigure)endFigure()).getModellerClass();
+                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModellerClass();
+                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModellerClass();
                         endClass.removeAssociation(startClass);
                     }
                 }
@@ -156,10 +166,13 @@ public class AssociationLineConnectionFigure extends LineConnection {
     protected void setAggregation(boolean isAggregation) {
         willChange();
         if (isAggregation) {
-            setStartDecoration(new AggregationDecoration());
+        	set(AttributeKeys.START_DECORATION, new AggregationDecorationFigure());
+        	// NB:       	
+        	//org.jhotdraw.draw.AttributeKeys.START_DECORATION 
+        	//org.jhotdraw.draw.AttributeKeys.END_DECORATIO
         }
         else {
-            setStartDecoration(null);
+        	set(AttributeKeys.START_DECORATION, null);
         }
         change();
         changed();
@@ -171,7 +184,9 @@ public class AssociationLineConnectionFigure extends LineConnection {
      * @return true if the association is an aggregation, false otherwise
      */
     protected boolean isAggregation() {
-        return getStartDecoration() != null;
+    	// this is kind of stupid b/c we're just checking the state of the ui to determine this,
+    	// and ignoring what might be in the model objects. consider revising
+        return (get(AttributeKeys.START_DECORATION).getClass()) == AggregationDecorationFigure.class;
     }
 
     /**
@@ -183,11 +198,11 @@ public class AssociationLineConnectionFigure extends LineConnection {
         willChange();
         if (isDirected) {
             ArrowTip arrow = new ArrowTip(0.4, 12.0, 0.0);
-            arrow.setBorderColor(java.awt.Color.black);
-            setEndDecoration(arrow);
+            //arrow.setBorderColor(java.awt.Color.black);
+            set(AttributeKeys.END_DECORATION, arrow);
         }
         else {
-            setEndDecoration(null);
+        	set(AttributeKeys.END_DECORATION, null);
         }
         change();
         changed();
@@ -199,18 +214,20 @@ public class AssociationLineConnectionFigure extends LineConnection {
      * @return true, if the association is directed, false otherwise
      */    
     protected boolean isUniDirectional() {
-        return getEndDecoration() != null;
+        return get(AttributeKeys.START_DECORATION) != null;
     }
 
     /**
      * Notify listeners about a change
      */
     protected void change() {
-        if (listener() != null) {
-            listener().figureRequestUpdate(new FigureChangeEvent(this));
-        }
+//        if (listener() != null) {
+//            listener().figureRequestUpdate(new FigureChangeEvent(this));
+//        }
     }   
 
+    
+    //NB: think our read strategy is going to be slightly different than what is below
     /**
      * Read a serialized AssociationLineConnection from an input stream and activate the
      * popup menu again.
@@ -218,7 +235,6 @@ public class AssociationLineConnectionFigure extends LineConnection {
     private void readObject(ObjectInputStream s) throws ClassNotFoundException, IOException {
         // call superclass' private readObject() indirectly
         s.defaultReadObject();
-        
-        setAttribute(Figure.POPUP_MENU, createPopupMenu());
+        //setAttribute(Figure.POPUP_MENU, createPopupMenu());
     }
 }
