@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="Source/jhotdraw7/src/main/java"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="Source/jhotdraw7/lib/annotations.jar"/>
 	<classpathentry kind="lib" path="Source/jhotdraw7/lib/jsr305.jar"/>

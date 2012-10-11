@@ -1,5 +1,6 @@
 package domain.UmlClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UmlMethodModel {
@@ -8,10 +9,22 @@ public class UmlMethodModel {
 	private List<UmlAttributeModel> _parameters;
 	// NB: all parameters should have access modifier 'local'
 	
+	public UmlMethodModel() {
+		this(AccessModifier.Public, "newMethod", new ArrayList<UmlAttributeModel>());
+	}
+	
 	public UmlMethodModel(AccessModifier accessMod, String name, List<UmlAttributeModel> params) {
 		this._accessModifier = accessMod;
 		this._name = name;
 		this._parameters = params;
+	}
+	
+	public void addParameter(UmlAttributeModel param) {
+		// check for duplicate names
+	}
+	
+	public void removeParameter(UmlAttributeModel param) {
+		// throw exception if param cannot be removed/found
 	}
 	
 	public AccessModifier getAccessModifier() {

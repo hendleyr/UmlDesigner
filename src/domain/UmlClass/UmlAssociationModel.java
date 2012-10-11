@@ -12,16 +12,14 @@ public class UmlAssociationModel {
 	public AssociationType getType() {
 		return type;
 	}
-
 	public void setType(AssociationType type) {
 		this.type = type;
 	}
-
 	public UmlClassModel getTarget() {
 		return target;
 	}
-
 	public void setTarget(UmlClassModel target) {
 		this.target = target;
+		// throw exception if this would create an inheritance cycle
 	}
 }

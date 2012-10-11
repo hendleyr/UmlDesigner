@@ -1,15 +1,26 @@
 package domain.UmlClass;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class UmlClassModel {
-	private AccessModifier accessModifier;
-	private Set<UmlAssociationModel> associations;
-	private String name;
+	private AccessModifier _accessModifier;
+	private String _name;
+	private List<UmlAssociationModel> _associations;
+	private List<UmlAttributeModel> _attributes;
+	private List<UmlMethodModel> _methods;
 	
-	private List<UmlAttributeModel> attributes;
-	private List<UmlMethodModel> methods;
+	public UmlClassModel() {
+		this(AccessModifier.Public, "newClass");
+	}
+	
+	public UmlClassModel(AccessModifier accessMod, String name) {
+		_accessModifier = accessMod;
+		_name = name;
+		_associations = new ArrayList<UmlAssociationModel>();
+		_attributes = new ArrayList<UmlAttributeModel>();
+		_methods = new ArrayList<UmlMethodModel>();
+	}
 	
 	public void addAssociation(UmlClassModel target, AssociationType associationType) {
 		// if associations set includes a UmlAssociationModel with SAME target and a 
@@ -20,7 +31,7 @@ public class UmlClassModel {
 		// above could be done in like 20seconds if java supported lambda expressions. fml
 
 		// add new UmlAssociationModel
-		associations.add(new UmlAssociationModel(target, associationType));
+		_associations.add(new UmlAssociationModel(target, associationType));
 	}
 	
 	public void removeAssociation(UmlClassModel target) {
@@ -30,9 +41,9 @@ public class UmlClassModel {
 		//TODO:
 		
 		// remove the UmlAssociationModel
-		for (UmlAssociationModel association : associations){
+		for (UmlAssociationModel association : _associations){
 		    if (association.getTarget().getName().equals(target.getName())) {
-		    	associations.remove(association);
+		    	_associations.remove(association);
 		    	return;
 		    }
 		}
@@ -47,36 +58,52 @@ public class UmlClassModel {
 		return false;
 	}
 	
-	public AccessModifier getAccessModifier() {
-		return accessModifier;
+	public void addAttribute(UmlAttributeModel attr) {
+		// check for duplicate, throw exception if found
 	}
-	public void setAccessModifier(AccessModifier accessModifier) {
-		this.accessModifier = accessModifier;
+	
+	public void removeAttribute(UmlAttributeModel attr) {
+		// throw exception if cannot find attr to remove
 	}
-	public Set<UmlAssociationModel> getRelationships() {
-		return associations;
+	
+	public void addMethod(UmlMethodModel method) {
+		// check for duplicate, throw exception if found
 	}
-	public void setRelationships(Set<UmlAssociationModel> associations) {
-		this.associations = associations;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public List<UmlAttributeModel> getAttributes() {
-		return attributes;
-	}
-	public void setAttributes(List<UmlAttributeModel> attributes) {
-		this.attributes = attributes;
-	}
-	public List<UmlMethodModel> getMethods() {
-		return methods;
-	}
-	public void setMethods(List<UmlMethodModel> methods) {
-		this.methods = methods;
+	
+	public void removeMethod(UmlMethodModel method) {
+		// throw exception if cannot find method to remove
 	}
 	
 	//TODO: toString, returning the text to go into a filestream to construct a code skeleton
+	
+	public AccessModifier getAccessModifier() {
+		return _accessModifier;
+	}
+	public void setAccessModifier(AccessModifier accessModifier) {
+		this._accessModifier = accessModifier;
+	}
+	public List<UmlAssociationModel> getAssociations() {
+		return _associations;
+	}
+	public void setAssociations(List<UmlAssociationModel> associations) {
+		this._associations = associations;
+	}
+	public String getName() {
+		return _name;
+	}
+	public void setName(String name) {
+		this._name = name;
+	}
+	public List<UmlAttributeModel> getAttributes() {
+		return _attributes;
+	}
+	public void setAttributes(List<UmlAttributeModel> attributes) {
+		this._attributes = attributes;
+	}
+	public List<UmlMethodModel> getMethods() {
+		return _methods;
+	}
+	public void setMethods(List<UmlMethodModel> methods) {
+		this._methods = methods;
+	}
 }

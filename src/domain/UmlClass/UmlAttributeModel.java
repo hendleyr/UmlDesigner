@@ -5,6 +5,10 @@ public class UmlAttributeModel {
 	private String _name;
 	private String _type;
 	
+	public UmlAttributeModel() {
+		this(AccessModifier.Private, "newAttribute", "Object");
+	}
+	
 	public UmlAttributeModel(AccessModifier accessModifier, String name, String type) {
 		_accessModifier = accessModifier;
 		_name = name;
@@ -22,8 +26,7 @@ public class UmlAttributeModel {
 	}
 	public void setType(String type) {
 		this._type = type;
-	}
-	
+	}	
 	public AccessModifier getAccessModifier() {
 		return _accessModifier;
 	}
