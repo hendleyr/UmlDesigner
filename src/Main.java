@@ -1,11 +1,9 @@
 
-
 import org.jhotdraw.app.Application;
 import org.jhotdraw.app.DefaultApplicationModel;
 import org.jhotdraw.app.MDIApplication;
 import org.jhotdraw.app.OSXApplication;
 import org.jhotdraw.app.SDIApplication;
-
 import ui.UmlDesignerApplicationModel;
 
 public class Main {
@@ -20,9 +18,8 @@ public class Main {
 			app = new SDIApplication();
 		}
 		
-		DefaultApplicationModel model = new UmlDesignerApplicationModel();	//TODO: uml designer model
+		DefaultApplicationModel model = new UmlDesignerApplicationModel();
 		model.setName("UML Designer");
-		//model.setVersion(Main.class.getPackage().getImplementationVersion());
 		model.setCopyright("");
 		model.setViewClassName("ui.UmlDesignerView");
 		app.setModel(model);

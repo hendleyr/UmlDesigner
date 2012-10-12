@@ -43,8 +43,8 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
     protected void handleConnect(Connector start, Connector end) {
         super.handleConnect(start, end);
 
-        UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
-        UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+        UmlClassModel startClass = ((UmlClassFigure)start).getModel();
+        UmlClassModel endClass = ((UmlClassFigure)end).getModel();
 
         //startClass.addSuperclass(endClass);
         startClass.addAssociation(endClass, AssociationType.Inheritance);
@@ -58,8 +58,8 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
     protected void handleDisconnect(Connector start, Connector end) {
         super.handleDisconnect(start, end);
         if ((start != null) && (end!= null)) {
-        	UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
-        	UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+        	UmlClassModel startClass = ((UmlClassFigure)start).getModel();
+        	UmlClassModel endClass = ((UmlClassFigure)end).getModel();
             //startClass.removeSuperclass(endClass);
             startClass.removeAssociation(endClass);
         }
@@ -76,8 +76,8 @@ public class InheritanceLineConnectionFigure extends LineConnectionFigure {
      * @return  true, if an inheritance relationship can be established, false otherwise
      */
     public boolean canConnect(Figure start, Figure end) {
-        UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
-        UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+        UmlClassModel startClass = ((UmlClassFigure)start).getModel();
+        UmlClassModel endClass = ((UmlClassFigure)end).getModel();
 
         return !endClass.hasInheritanceCycle(startClass);
     }

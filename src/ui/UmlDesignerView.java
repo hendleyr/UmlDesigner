@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.BorderLayout;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -8,9 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.LinkedList;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import org.jhotdraw.app.AbstractView;
@@ -21,6 +24,7 @@ import org.jhotdraw.draw.DefaultDrawingEditor;
 import org.jhotdraw.draw.DefaultDrawingView;
 import org.jhotdraw.draw.Drawing;
 import org.jhotdraw.draw.DrawingEditor;
+import org.jhotdraw.draw.action.ButtonFactory;
 import org.jhotdraw.draw.io.DOMStorableInputOutputFormat;
 import org.jhotdraw.draw.io.ImageOutputFormat;
 import org.jhotdraw.draw.io.InputFormat;
@@ -28,6 +32,7 @@ import org.jhotdraw.draw.io.OutputFormat;
 import org.jhotdraw.gui.PlacardScrollPaneLayout;
 import org.jhotdraw.gui.URIChooser;
 import org.jhotdraw.undo.UndoRedoManager;
+import org.jhotdraw.util.ResourceBundleUtil;
 
 import domain.UmlDesignerFactory;
 
@@ -35,10 +40,11 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @SuppressWarnings("serial")
 public class UmlDesignerView extends AbstractView {
-    private JScrollPane scrollPane;
+	public final static String GRID_VISIBLE_PROPERTY = "gridVisible";
+	private JScrollPane scrollPane;
     private DefaultDrawingView view;
     private UndoRedoManager undo;
-    private DrawingEditor editor;
+    private DrawingEditor editor;    
     
     public UmlDesignerView() {
     	initComponents();
@@ -50,12 +56,31 @@ public class UmlDesignerView extends AbstractView {
         view.getDrawing().addUndoableEditListener(undo);
         initActions();
         undo.addPropertyChangeListener(new PropertyChangeListener() {
-
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 setHasUnsavedChanges(undo.hasSignificantEdits());
             }
         });
+        
+        ResourceBundleUtil labels = ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
+
+        JPanel placardPanel = new JPanel(new BorderLayout());
+        javax.swing.AbstractButton pButton;
+        pButton = ButtonFactory.createZoomButton(view);
+        pButton.putClientProperty("Quaqua.Button.style", "placard");
+        pButton.putClientProperty("Quaqua.Component.visualMargin", new Insets(0, 0, 0, 0));
+        pButton.setFont(UIManager.getFont("SmallSystemFont"));
+        placardPanel.add(pButton, BorderLayout.WEST);
+        pButton = ButtonFactory.createToggleGridButton(view);
+        pButton.putClientProperty("Quaqua.Button.style", "placard");
+        pButton.putClientProperty("Quaqua.Component.visualMargin", new Insets(0, 0, 0, 0));
+        pButton.setFont(UIManager.getFont("SmallSystemFont"));
+        labels.configureToolBarButton(pButton, "view.toggleGrid.placard");
+        placardPanel.add(pButton, BorderLayout.EAST);
+        scrollPane.add(placardPanel, JScrollPane.LOWER_LEFT_CORNER);
+        
+        setGridVisible(preferences.getBoolean("view.gridVisible", true));
+        setScaleFactor(preferences.getDouble("view.scaleFactor", 1d));
     }
 	
     private void initComponents() {
@@ -179,5 +204,27 @@ public class UmlDesignerView extends AbstractView {
             newValue.add(view);
         }
 	}
+	
+    public void setGridVisible(boolean newValue) {
+        boolean oldValue = isGridVisible();
+        view.setConstrainerVisible(newValue);
+        firePropertyChange(GRID_VISIBLE_PROPERTY, oldValue, newValue);
+        preferences.putBoolean("view.gridVisible", newValue);
+    }
 
+    public boolean isGridVisible() {
+        return view.isConstrainerVisible();
+    }
+
+    public double getScaleFactor() {
+        return view.getScaleFactor();
+    }
+
+    public void setScaleFactor(double newValue) {
+        double oldValue = getScaleFactor();
+        view.setScaleFactor(newValue);
+
+        firePropertyChange("scaleFactor", oldValue, newValue);
+        preferences.putDouble("view.scaleFactor", newValue);
+    }
 }

@@ -20,6 +20,5 @@ public class UmlAssociationModel {
 	}
 	public void setTarget(UmlClassModel target) {
 		this.target = target;
-		// throw exception if this would create an inheritance cycle
 	}
 }

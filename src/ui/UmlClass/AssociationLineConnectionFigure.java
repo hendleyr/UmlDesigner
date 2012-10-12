@@ -53,8 +53,8 @@ public class AssociationLineConnectionFigure extends LineConnectionFigure {
     @Override
     protected void handleConnect(Connector start, Connector end) {
     	super.handleConnect(start, end);
-    	UmlClassModel startClass = ((UmlClassFigure)start.getOwner()).getModellerClass();
-    	UmlClassModel endClass = ((UmlClassFigure)end.getOwner()).getModellerClass();
+    	UmlClassModel startClass = ((UmlClassFigure)start.getOwner()).getModel();
+    	UmlClassModel endClass = ((UmlClassFigure)end.getOwner()).getModel();
     	
     	// TODO: strategy for determining the association type elegantly
     	startClass.addAssociation(endClass, AssociationType.Dependency);
@@ -70,8 +70,8 @@ public class AssociationLineConnectionFigure extends LineConnectionFigure {
         super.handleDisconnect(start, end);
         // this could be an important check depending on how we do undo/redo
         if ((start != null) && (end!= null)) {
-        	UmlClassModel startClass = ((UmlClassFigure)start).getModellerClass();
-        	UmlClassModel endClass = ((UmlClassFigure)end).getModellerClass();
+        	UmlClassModel startClass = ((UmlClassFigure)start).getModel();
+        	UmlClassModel endClass = ((UmlClassFigure)end).getModel();
             startClass.removeAssociation(endClass);
             endClass.removeAssociation(startClass);
         }
@@ -138,15 +138,15 @@ public class AssociationLineConnectionFigure extends LineConnectionFigure {
                     setUniDirectional(!isUniDirectional());
                     if (isUniDirectional()) {
                         ((JMenuItem)event.getSource()).setText("bi-directional");
-                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModellerClass();
-                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModellerClass();
+                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModel();
+                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModel();
                         endClass.addAssociation(startClass, AssociationType.Dependency);
                         			//TODO: determine assoc. type
                     }
                     else {
                         ((JMenuItem)event.getSource()).setText("uni-directional");
-                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModellerClass();
-                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModellerClass();
+                        UmlClassModel startClass = ((UmlClassFigure)getStartFigure()).getModel();
+                        UmlClassModel endClass = ((UmlClassFigure)getEndFigure()).getModel();
                         endClass.removeAssociation(startClass);
                     }
                 }
