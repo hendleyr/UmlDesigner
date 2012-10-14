@@ -1,6 +1,7 @@
 package domain.UmlClass;
 
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import java.util.ArrayList;
@@ -72,7 +73,18 @@ public class TestUmlClassModel{
 	
 	@Test
 	public void testHasInheritanceCycle() {
-		
+		//test two classes with no associations
+		assertFalse(testModel.hasInheritanceCycle(targetModel));
+		//create non-inheritance relationship between two classes
+		targetModel.addAssociation(testModel, AssociationType.Dependency);
+		assertFalse(testModel.hasInheritanceCycle(targetModel));
+		//create inheritance relationship in target class to non-tested class
+		targetModel.addAssociation(anotherModel, AssociationType.Inheritance);
+		assertFalse(testModel.hasInheritanceCycle(targetModel));
+		//create inheritance relationship in target class to tested class
+		targetModel.removeAssociation(testModel);
+		targetModel.addAssociation(testModel, AssociationType.Inheritance);
+		assertTrue(testModel.hasInheritanceCycle(targetModel));
 	}
 	
 	@Test
