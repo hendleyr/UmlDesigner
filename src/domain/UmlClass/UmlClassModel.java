@@ -22,56 +22,147 @@ public class UmlClassModel {
 		_methods = new ArrayList<UmlMethodModel>();
 	}
 	
-	public void addAssociation(UmlClassModel target, AssociationType associationType) {
+	public UmlAssociationModel addAssociation(UmlClassModel target, AssociationType associationType) {
 		// if associations set includes a UmlAssociationModel with SAME target and a 
 		// DIFFERENT associationType, throw exception
-		//TODO:
+		for (UmlAssociationModel association : _associations){
+			if (association.getTarget().getName().equals(target.getName()) && !association.getType().equals(associationType)){
+				return null;
+			}
+		}
 		// do nothing if association already exists
-		//TODO:
+		for (UmlAssociationModel association : _associations){
+			if (association.getTarget().getName().equals(target.getName()) && association.getType().equals(associationType)){
+				return null;
+			}
+		}
 		// above could be done in like 20seconds if java supported lambda expressions. fml
 
 		// add new UmlAssociationModel
-		_associations.add(new UmlAssociationModel(target, associationType));
+		UmlAssociationModel newAssociationModel = new UmlAssociationModel(target, associationType);
+		_associations.add(newAssociationModel);
+		return newAssociationModel;
 	}
 	
-	public void removeAssociation(UmlClassModel target) {
+	public UmlAssociationModel removeAssociation(UmlClassModel target) {
 		// if multiple tuples in association set have this target, throw exception
-		//TODO:
+		for (UmlAssociationModel associationA : _associations){
+			for (UmlAssociationModel associationB : _associations){
+				if (associationA.getTarget().getName().equals(associationB.getTarget().getName()) &&
+						!associationA.equals(associationB)){
+					return null;
+				}
+			}
+		}
 		// if association does not exist in the set, throw exception
-		//TODO:
+		boolean associationFound = false;
+		for (UmlAssociationModel association : _associations){
+			if (association.getTarget().getName().equals(target.getName())){
+				associationFound = true;
+				break;
+			}
+		}
+		if (!associationFound){
+			return null;
+		}
 		
 		// remove the UmlAssociationModel
 		for (UmlAssociationModel association : _associations){
 		    if (association.getTarget().getName().equals(target.getName())) {
 		    	_associations.remove(association);
-		    	return;
+		    	return association;
 		    }
 		}
+		return null;
 	}
 	
+	// maybe this would make more sense as "willCreateInheritanceCycle"
 	public boolean hasInheritanceCycle(UmlClassModel target) {
-		/* TODO: "An inheritance relationship can be established if
-	     * there is no cyclic inheritance graph. This method is called before
-	     * the two classes are connected in the diagram." */
-		
-		// in english, "a super class cannot inherit from one of its subclasses"
+		// "a super class cannot inherit from one of its subclasses"
+		// before creating an inheritance association, we inspect the associations of target;
+		// if target inherits from this, return true
+		List<UmlAssociationModel> targetAssociations = target.getAssociations();
+		for(UmlAssociationModel association : targetAssociations) {
+			if (association.getTarget() == this && association.getType() == AssociationType.Inheritance)
+				return true;
+		}
 		return false;
 	}
 	
-	public void addAttribute(UmlAttributeModel attr) {
+	public boolean addAttribute(UmlAttributeModel attr) {
 		// check for duplicate, throw exception if found
+		for (UmlAttributeModel attribute : _attributes){
+			if (attribute.getName().equals(attr.getName())){
+				return false;
+			}
+		}
+		
+		// add new UmlAttributeModel
+		_attributes.add(attr);
+		return true;
 	}
 	
-	public void removeAttribute(UmlAttributeModel attr) {
+	public boolean removeAttribute(UmlAttributeModel attr) {
 		// throw exception if cannot find attr to remove
+		boolean attributeFound = false;
+		for (UmlAttributeModel attribute : _attributes){
+			if (attribute.getName().equals(attr.getName())){
+				attributeFound = true;
+				break;
+			}
+		}
+		if (!attributeFound){
+			return false;
+		}
+		
+		
+		//remove UmlAttributeModel
+		for (UmlAttributeModel attribute : _attributes){
+			if (attribute.getName().equals(attr.getName())){
+				_attributes.remove(attribute);
+				return true;
+			}
+		}
+		return false;
 	}
 	
-	public void addMethod(UmlMethodModel method) {
+	public boolean addMethod(UmlMethodModel method) {
 		// check for duplicate, throw exception if found
+		for (UmlMethodModel methodModel : _methods){
+			if (methodModel.getName().equals(method.getName())){
+				return false;
+				//throw new Exception("Duplicate method found.");
+			}
+		}
+		
+		// add new UmlMethodModel
+		_methods.add(method);
+		return true;
 	}
 	
-	public void removeMethod(UmlMethodModel method) {
+	public boolean removeMethod(UmlMethodModel method) {
 		// throw exception if cannot find method to remove
+		boolean methodFound = false;
+		for (UmlMethodModel methodModel : _methods){
+			if (methodModel.getName().equals(method.getName())){
+				methodFound = true;
+				break;
+			}
+		}
+		if (!methodFound){
+			return false;
+			//throw new Exception("Method not found.");
+		}
+		
+		//remove UmlMethodModel
+		for (UmlMethodModel methodModel : _methods){
+			if (methodModel.getName().equals(method.getName())){
+				_methods.remove(methodModel);
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	//TODO: toString, returning the text to go into a filestream to construct a code skeleton
