@@ -134,7 +134,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             	if (attrText.indexOf(':') == -1) {
             		attrType = "Object";
             		
-            		Matcher m = p.matcher(attrText.substring(0, attrText.indexOf(':')));
+            		Matcher m = p.matcher(attrText.substring(0));
             		m.find();
             		attrName = m.group();
             	}
@@ -158,7 +158,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             				(AccessModifier.Private, "newAttribute" + target.uniqAttrId, "Object");
             	}
             	((TextFigure)attrFigure).setText
-            		(attrAccessModifier.getSymbol() + remappedAttr.getName() + " : " + remappedAttr.getType());
+            		(attrAccessModifier.getSymbol() + " " + remappedAttr.getName() + " : " + remappedAttr.getType());
         	}
     	}
     }
@@ -242,18 +242,18 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         //ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
     }
     
-    private TextFigure getNameFigure() {
+    protected TextFigure getNameFigure() {
     	ListFigure nameCompartment = (ListFigure) this.getChild(0);
     	TextFigure nameFigure = (TextFigure) nameCompartment.getChild(0);
     	return nameFigure;
     }
     
-    private ListFigure getAttributesCompartment() {
+    protected ListFigure getAttributesCompartment() {
     	ListFigure attributesCompartment = (ListFigure) this.getChild(2);
     	return attributesCompartment;
     }
     
-    private ListFigure getMethodsCompartment() {
+    protected ListFigure getMethodsCompartment() {
     	ListFigure methodsCompartment = (ListFigure) this.getChild(4);
     	return methodsCompartment;
     }
@@ -266,7 +266,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         //that.getNameFigure().setText("newClass");
         List<Figure> attrFigureList = that.getAttributesCompartment().getChildren();
         for(int i = 0; i < attrFigureList.size(); ++i) {
-        	((TextFigure)attrFigureList.get(i)).addFigureListener(new AttributeAdapter(this));
+        	((TextFigure)attrFigureList.get(i)).addFigureListener(new AttributeAdapter(that));
         }
         that.getNameFigure().addFigureListener(new ClassNameAdapter(that));
         return that;
