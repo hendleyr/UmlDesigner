@@ -183,9 +183,7 @@ public class UmlClassModel {
 	public void makeSkelCode(UmlClassModel target) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("package domain.UmlClass;\n\n")
-				.append("import java.util.ArrayList;\nimport java.util.List;\n\n")
-				.append(target.getAccessModifier()).append(" class ")
+		sb.append(target.getAccessModifier()).append(" class ")
 				.append(target.getName()).append(" ");
 
 		for (UmlAssociationModel association : _associations) {
