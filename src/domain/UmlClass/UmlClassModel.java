@@ -1,5 +1,7 @@
 package domain.UmlClass;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,18 +54,21 @@ public class UmlClassModel {
 	}
 
 	public UmlAssociationModel removeAssociation(UmlClassModel target) {
-		// if multiple tuples in association set have this target, throw exception
-		for(UmlAssociationModel associationA : _associations) {
-			for(UmlAssociationModel associationB : _associations) {
-				if(associationA.getTarget().getName().equals(associationB.getTarget().getName()) && !associationA.equals(associationB)){
+		// if multiple tuples in association set have this target, throw
+		// exception
+		for (UmlAssociationModel associationA : _associations) {
+			for (UmlAssociationModel associationB : _associations) {
+				if (associationA.getTarget().getName()
+						.equals(associationB.getTarget().getName())
+						&& !associationA.equals(associationB)) {
 					return null;
 				}
 			}
 		}
 		// if association does not exist in the set, throw exception
 		boolean associationFound = false;
-		for(UmlAssociationModel association : _associations) {
-			if(association.getTarget().getName().equals(target.getName())) {
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().getName().equals(target.getName())) {
 				associationFound = true;
 				break;
 			}
@@ -85,11 +90,13 @@ public class UmlClassModel {
 	// maybe this would make more sense as "willCreateInheritanceCycle"
 	public boolean hasInheritanceCycle(UmlClassModel target) {
 		// "a super class cannot inherit from one of its subclasses"
-		// before creating an inheritance association, we inspect the associations of target;
+		// before creating an inheritance association, we inspect the
+		// associations of target;
 		// if target inherits from this, return true
 		List<UmlAssociationModel> targetAssociations = target.getAssociations();
-		for(UmlAssociationModel association : targetAssociations) {
-			if(association.getTarget() == this && association.getType() == AssociationType.Inheritance)
+		for (UmlAssociationModel association : targetAssociations) {
+			if (association.getTarget() == this
+					&& association.getType() == AssociationType.Inheritance)
 				return true;
 		}
 		return false;
@@ -97,12 +104,12 @@ public class UmlClassModel {
 
 	public boolean addAttribute(UmlAttributeModel attr) {
 		// check for duplicate, throw exception if found
-		for(UmlAttributeModel attribute : _attributes) {
-			if(attribute.getName().equals(attr.getName())){
+		for (UmlAttributeModel attribute : _attributes) {
+			if (attribute.getName().equals(attr.getName())) {
 				return false;
 			}
 		}
-		
+
 		// add new UmlAttributeModel
 		_attributes.add(attr);
 		return true;
@@ -112,7 +119,7 @@ public class UmlClassModel {
 		// throw exception if cannot find attr to remove
 		boolean attributeFound = false;
 		for (UmlAttributeModel attribute : _attributes) {
-			if(attribute.getName().equals(attr.getName())){
+			if (attribute.getName().equals(attr.getName())) {
 				attributeFound = true;
 				break;
 			}
@@ -120,10 +127,10 @@ public class UmlClassModel {
 		if (!attributeFound) {
 			return false;
 		}
-		
+
 		// remove UmlAttributeModel
-		for(UmlAttributeModel attribute : _attributes) {
-			if(attribute.getName().equals(attr.getName())) {
+		for (UmlAttributeModel attribute : _attributes) {
+			if (attribute.getName().equals(attr.getName())) {
 				_attributes.remove(attribute);
 				return true;
 			}
@@ -133,14 +140,14 @@ public class UmlClassModel {
 
 	public boolean addMethod(UmlMethodModel method) {
 		// check for duplicate, throw exception if found
-		for(UmlMethodModel methodModel : _methods) {
-			if(methodModel.getName().equals(method.getName())) {
+		for (UmlMethodModel methodModel : _methods) {
+			if (methodModel.getName().equals(method.getName())) {
 				return false;
-				//throw new Exception ("Duplicate method found.");
+				// throw new Exception ("Duplicate method found.");
 			}
 		}
-		
-		//ad new UmlMethodModel
+
+		// ad new UmlMethodModel
 		_methods.add(method);
 		return true;
 	}
@@ -149,29 +156,74 @@ public class UmlClassModel {
 		// throw exception if cannot find method to remove
 		boolean methodFound = false;
 		for (UmlMethodModel methodModel : _methods) {
-			if(methodModel.getName().equals(method.getName())){
+			if (methodModel.getName().equals(method.getName())) {
 				methodFound = true;
 				break;
 			}
 		}
-		
+
 		if (!methodFound) {
 			return false;
-			//throw new Exception ("Method not found.");
+			// throw new Exception ("Method not found.");
 		}
-		
-		//remove UmlMethodModel
-		for(UmlMethodModel methodModel : _methods) {
-			if(methodModel.getName().equals(method.getName())) {
+
+		// remove UmlMethodModel
+		for (UmlMethodModel methodModel : _methods) {
+			if (methodModel.getName().equals(method.getName())) {
 				_methods.remove(methodModel);
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
-	// TODO: toString, returning the text to go into a filestream to construct a code skeleton
+	// TODO: toString, returning the text to go into a filestream to construct a
+	// code skeleton
+	public void makeSkelCode(UmlClassModel target) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("package domain.UmlClass;\n\n")
+				.append("import java.util.ArrayList;\nimport java.util.List;\n\n")
+				.append(target.getAccessModifier()).append(" class ")
+				.append(target.getName()).append(" ");
+
+		for (UmlAssociationModel association : _associations) {
+			if (association.getType().equals("Inheritance")) {
+				sb.append("Extends");
+			}
+		}
+			
+		sb.append(target.getAssociations()).append(" {\n");
+		for (UmlAttributeModel value : target._attributes) {
+			sb.append(value.getAccessModifier()).append(" ")
+					.append(value.getType()).append(" ")
+					.append(value.getName()).append("\n");
+		}
+
+		for (UmlMethodModel value : target._methods) {
+			sb.append(value.getAccessModifier()).append(" ");
+			sb.append(value.getReturnType()).append(" ");
+			sb.append(value.getName()).append(" (")
+					.append(value.getParameters()).append(") {\n");
+			sb.append("\n\n\n}\n");
+		}
+		sb.append("}\n");
+
+		String output = sb.toString();
+		String fileName = "skelCode.java";
+
+		try {
+
+			PrintWriter outStream = new PrintWriter(fileName);
+
+			outStream.write(output);
+			outStream.close();
+		
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public AccessModifier getAccessModifier() {
 		return _accessModifier;
