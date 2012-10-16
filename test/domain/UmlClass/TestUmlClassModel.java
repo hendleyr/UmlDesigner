@@ -131,4 +131,14 @@ public class TestUmlClassModel{
 		//remove an attribute that doesn't exist (throws exception)
 		assertFalse(testModel.removeMethod(nonexistentMethod));
 	}
+	
+	@Test
+	public void testMakeCodeSkel() {
+		//test default
+		testModel.addAssociation(targetModel, AssociationType.Inheritance);
+		targetModel.addMethod(anotherMethod);
+		targetModel.addMethod(nonexistentMethod);
+		targetModel.addAttribute(testAttribute);
+		testModel.makeSkelCode(targetModel);
+	}
 }

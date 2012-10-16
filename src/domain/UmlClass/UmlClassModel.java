@@ -182,8 +182,8 @@ public class UmlClassModel {
 	// code skeleton
 	public void makeSkelCode(UmlClassModel target) {
 		StringBuilder sb = new StringBuilder();
-
-		sb.append(target.getAccessModifier()).append(" class ")
+		
+		sb.append(target.getAccessModifier().toString().toLowerCase()).append(" class ")
 				.append(target.getName()).append(" ");
 
 		for (UmlAssociationModel association : _associations) {
@@ -194,17 +194,20 @@ public class UmlClassModel {
 			
 		sb.append(target.getAssociations()).append(" {\n");
 		for (UmlAttributeModel value : target._attributes) {
-			sb.append(value.getAccessModifier()).append(" ")
+			sb.append("\t");
+			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ")
 					.append(value.getType()).append(" ")
-					.append(value.getName()).append("\n");
+					.append(value.getName()).append(";\n");
 		}
+		sb.append("\n");
 
 		for (UmlMethodModel value : target._methods) {
-			sb.append(value.getAccessModifier()).append(" ");
+			sb.append("\t");
+			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
 			sb.append(value.getReturnType()).append(" ");
 			sb.append(value.getName()).append(" (")
 					.append(value.getParameters()).append(") {\n");
-			sb.append("\n\n\n}\n");
+			sb.append("\n\t}\n");
 		}
 		sb.append("}\n");
 
