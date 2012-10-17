@@ -20,8 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.Action;
-
-import org.jhotdraw.app.action.edit.AbstractSelectionAction;
 import org.jhotdraw.draw.AttributeKey;
 import org.jhotdraw.draw.AttributeKeys;
 import org.jhotdraw.draw.Figure;
@@ -30,7 +28,7 @@ import org.jhotdraw.draw.LineConnectionFigure;
 import org.jhotdraw.draw.ListFigure;
 import org.jhotdraw.draw.RectangleFigure;
 import org.jhotdraw.draw.TextFigure;
-import org.jhotdraw.draw.action.AbstractDrawingEditorAction;
+import javax.swing.AbstractAction;
 import org.jhotdraw.draw.event.FigureAdapter;
 import org.jhotdraw.draw.event.FigureEvent;
 import org.jhotdraw.draw.layouter.VerticalLayouter;
@@ -275,7 +273,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     @Override
     public Collection<Action> getActions(Point2D.Double p) {
     	Collection<Action> actions = new ArrayList<Action>();
-    	actions.add(new AbstractSelectionAction(null) {
+    	actions.add(new AbstractAction(null) {
     		public final static String id = "edit.addAttribute";
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -287,7 +285,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 		        ++uniqAttrId;
 			}
     	});
-    	actions.add(new AbstractSelectionAction(null) {
+    	actions.add(new AbstractAction(null) {
     		public final static String id = "edit.addMethod";
 			@Override
 			public void actionPerformed(ActionEvent e) {
