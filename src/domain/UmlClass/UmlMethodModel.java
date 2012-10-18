@@ -8,7 +8,6 @@ public class UmlMethodModel {
 	private String _returnType;
 	private String _name;
 	private List<UmlAttributeModel> _parameters;
-	// NB: all parameters should have access modifier 'local'
 	
 	public UmlMethodModel() {
 		this(AccessModifier.Public, "newMethod", new ArrayList<UmlAttributeModel>());
@@ -18,14 +17,6 @@ public class UmlMethodModel {
 		this._accessModifier = accessMod;
 		this._name = name;
 		this._parameters = params;
-	}
-	
-	public void addParameter(UmlAttributeModel param) {
-		// check for duplicate names
-	}
-	
-	public void removeParameter(UmlAttributeModel param) {
-		// throw exception if param cannot be removed/found
 	}
 	
 	public AccessModifier getAccessModifier() {
