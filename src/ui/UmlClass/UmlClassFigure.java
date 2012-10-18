@@ -216,8 +216,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         nameCompartment.add(nameFigure);
         nameFigure.addFigureListener(new ClassNameAdapter(this));
         
-        String attrName = "newAttribute" + uniqAttrId;
-        ++uniqAttrId;
+        String attrName = "newAttribute";
         String attrType = "Object";
         AccessModifier attrAccessMod = AccessModifier.Private;
         TextFigure attrFigure = new TextFigure(attrAccessMod.getSymbol() + " " + attrName + " : " + attrType);
