@@ -5,8 +5,7 @@ public enum AccessModifier {
 	// our access modifiers
 	Public('+'),
 	Private('-'),
-	Protected('#'),
-	Local(' ');
+	Protected('#');
 	
 	private char _symbol;
 	
