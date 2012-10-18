@@ -9,12 +9,11 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeListener;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,8 +34,8 @@ import org.jhotdraw.draw.layouter.VerticalLayouter;
 import org.jhotdraw.geom.Insets2D;
 import org.jhotdraw.samples.pert.figures.SeparatorLineFigure;
 import org.jhotdraw.util.ResourceBundleUtil;
-
-import sun.misc.Regexp;
+import org.jhotdraw.xml.DOMInput;
+import org.jhotdraw.xml.DOMOutput;
 
 import domain.UmlClass.AccessModifier;
 import domain.UmlClass.UmlAttributeModel;
@@ -71,7 +70,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         	else if (text.startsWith("#")) {
         		modelAccessModifier = AccessModifier.Protected;
         	}
-        	else modelAccessModifier = AccessModifier.Local;
+        	else modelAccessModifier = AccessModifier.Public;
         	
         	Pattern p = Pattern.compile("([\\w]+\\.)*[\\w]+");
         	Matcher m = p.matcher(text);
@@ -103,9 +102,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         	// new strat: reinitialize the model's attr list; examine all text figures in  
         	// the compartment, map them into attrModels, then re-add them to the classModel
         	// if user entered bad data, we assign default values w/ uniqAttrId
-        	// TODO: bad design to use a try/catch on the re-add, refactor addAttribute to boolean...?
         	List<Figure> attrFigures = target.getAttributesCompartment().getChildren();
-        	List<UmlAttributeModel> remappedAttrs = new ArrayList<UmlAttributeModel>();
         	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
         	
         	// reinit class model's attrList
@@ -124,7 +121,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             	else if (attrText.startsWith("#")) {
             		attrAccessModifier = AccessModifier.Protected;
             	}
-            	else attrAccessModifier = AccessModifier.Local;
+            	else attrAccessModifier = AccessModifier.Private;
         		
         		// assess <name> : <type>
         		String attrType;
@@ -169,10 +166,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         }
 
         @Override
-        public void attributeChanged(FigureEvent evt) {
-            // We could fire a property change event here, in case
-            // some other object would like to observe us.
-            //target.firePropertyChange("duration", e.getOldValue(), e.getNewValue());
+        public void figureChanged(FigureEvent evt) {
         }
     }
     
@@ -232,10 +226,11 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         attrFigure.addFigureListener(new AttributeAdapter(this));
         
         AccessModifier methodAccessMod = AccessModifier.Public;
-        String methodName = "newMethod" + uniqMethodId;
+        String methodName = "newMethod";
         List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
         //getModel().addMethod(new UmlMethodModel(methodAccessMod, methodName, methodParams));
-        methodsCompartment.add(new TextFigure("+ newMethod()"));
+        methodsCompartment.add(new TextFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")"));
+        //methodsCompartment.add(new TextFigure("+ newMethod()"));
         
         //ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
     }
@@ -271,30 +266,113 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     }
     
     @Override
+    public void write(DOMOutput out) throws IOException {
+        Rectangle2D.Double r = getBounds();
+        out.addAttribute("x", r.x);
+        out.addAttribute("y", r.y);
+        writeAttributes(out);
+        out.openElement("classModel");
+        
+        out.openElement("classAccessModifier");
+        out.writeObject(getModel().getAccessModifier());
+        out.closeElement();
+        
+        out.openElement("className");
+        out.writeObject(getModel().getName());
+        out.closeElement();
+        
+        out.openElement("attributes");
+        for(UmlAttributeModel attr : getModel().getAttributes()) {
+        	out.openElement("attrAccessModifier");
+        	out.writeObject(attr.getAccessModifier());
+        	out.closeElement();
+        	
+        	out.openElement("attrName");
+        	out.writeObject(attr.getName());
+        	out.closeElement();
+        	
+        	out.openElement("attrType");
+        	out.writeObject(attr.getType());
+        	out.closeElement();
+        }
+        out.closeElement();
+        
+        out.openElement("methods");
+        for(UmlMethodModel method : getModel().getMethods()) {
+        	out.openElement("methodAccessModifier");
+        	out.writeObject(method.getAccessModifier());
+        	out.closeElement();
+        	
+        	out.openElement("methodType");
+        	out.writeObject(method.getReturnType());
+        	out.closeElement();
+        	
+        	out.openElement("methodName");
+        	out.writeObject(method.getName());
+        	out.closeElement();
+        	
+        	out.openElement("params");
+        	for(UmlAttributeModel param : method.getParameters()) {
+        		out.openElement("paramType");
+        		out.writeObject(param.getType());
+        		out.closeElement();
+        		
+        		out.openElement("paramName");
+        		out.writeObject(param.getName());
+        		out.closeElement();
+        	}
+        	out.closeElement();
+        }
+        out.closeElement();
+        
+        out.closeElement();
+    }
+    
+    @Override
+    public void read(DOMInput in) throws IOException {
+    	// TODO:
+        double x = in.getAttribute("x", 0d);
+        double y = in.getAttribute("y", 0d);
+        double w = in.getAttribute("w", 0d);
+        double h = in.getAttribute("h", 0d);
+        setBounds(new Point2D.Double(x, y), new Point2D.Double(x + w, y + h));
+        readAttributes(in);
+        in.openElement("classModel");
+        in.openElement("className");
+        //setName((String) in.readObject());
+        in.closeElement();
+        in.closeElement();
+    }
+        
+    @Override
     public Collection<Action> getActions(Point2D.Double p) {
     	Collection<Action> actions = new ArrayList<Action>();
     	actions.add(new AbstractAction(null) {
     		public final static String id = "edit.addAttribute";
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				willChange();
 				ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
 				labels.configureAction(this, id);
 		        // add a new attribute text figure
 				getAttributesCompartment().add(new TextFigure("- newAttribute" + uniqAttrId + ": Object"));
 				//TODO: map to model
 		        ++uniqAttrId;
+		        changed();
 			}
     	});
     	actions.add(new AbstractAction(null) {
     		public final static String id = "edit.addMethod";
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				willChange();
 				ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
 		        labels.configureAction(this, id);
 				// add a new method text figure
 		        getMethodsCompartment().add(new TextFigure("+ newMethod" + uniqMethodId + "()"));
 		        //TODO: map to model
 	        	++uniqMethodId;
+	        	changed();
 			}
     	});
     	
