@@ -43,11 +43,11 @@ public class TestUmlClassFigure {
 		umlClassFigure.getNameFigure().fireFigureChanged();
 		
 		// assert that our regex filtered user input as expected and the adapter mapped results appropriately
-		assertTrue(umlClassFigure.getModel().getAccessModifier().equals(AccessModifier.Local));
+		assertTrue(umlClassFigure.getModel().getAccessModifier().equals(AccessModifier.Public));
 		assertTrue(umlClassFigure.getModel().getName().equals("MOCK"));
 		// we get a double space in the output when using an access modifier local, because it's symbol is ' ' instead of ''.
 		// this feels dumb and I'm sure there's a simple fix
-		assertTrue(umlClassFigure.getNameFigure().getText().equals("  MOCK"));
+		assertTrue(umlClassFigure.getNameFigure().getText().equals("+ MOCK"));
 	}
 	
 	@Test
@@ -73,7 +73,7 @@ public class TestUmlClassFigure {
 		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getAccessModifier().equals(AccessModifier.Protected));
 		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getName().equals("employeeId"));
 		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getType().equals("int"));
-		attrFigure.getText().equals("# employeeId : int");
+		assertTrue(attrFigure.getText().equals("# employeeId : int"));
 	}
 	
 	@Test
@@ -84,11 +84,11 @@ public class TestUmlClassFigure {
 		attrFigure.fireFigureChanged();
 		
 		// assert that our regex filtered user input as expected and the adapter mapped results appropriately
-		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getAccessModifier().equals(AccessModifier.Local));
+		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getAccessModifier().equals(AccessModifier.Private));
 		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getName().equals("MOCK"));
 		assertTrue(umlClassFigure.getModel().getAttributes().get(0).getType().equals("Object"));
 		// we get a double space in the output when using an access modifier local, because it's symbol is ' ' instead of ''.
 		// this feels dumb and I'm sure there's a simple fix
-		attrFigure.getText().equals("  MOCK : Object");
+		assertTrue(attrFigure.getText().equals("- MOCK : Object"));
 	}
 }
