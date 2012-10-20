@@ -180,6 +180,43 @@ public class UmlClassModel {
 
 	// TODO: toString, returning the text to go into a filestream to construct a
 	// code skeleton
+	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(getAccessModifier().toString().toLowerCase()).append(" class ")
+				.append(getName()).append(" ");
+
+		for (UmlAssociationModel association : _associations) {
+			if (association.getType().equals("Inheritance")) {
+				sb.append("Extends ");
+				sb.append(association.getTarget().getName());
+			}
+		}
+			
+		sb.append(getAssociations()).append(" {\n");
+		for (UmlAttributeModel value : _attributes) {
+			sb.append("\t");
+			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ")
+					.append(value.getType()).append(" ")
+					.append(value.getName()).append(";\n");
+		}
+		sb.append("\n");
+
+		for (UmlMethodModel value : _methods) {
+			sb.append("\t");
+			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
+			sb.append(value.getReturnType()).append(" ");
+			sb.append(value.getName()).append(" (")
+					.append(value.getParameters()).append(") {\n");
+			sb.append("\n\t}\n");
+		}
+		sb.append("}\n");
+
+		String output = sb.toString();
+		return output;
+	}
+	
 	public void makeSkelCode(UmlClassModel target) {
 		StringBuilder sb = new StringBuilder();
 		
