@@ -167,6 +167,63 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 
         @Override
         public void figureChanged(FigureEvent evt) {
+        	// VERIFY AND MAP USER INPUT TO MODELS
+        	// new strat: reinitialize the model's method list; examine all text figures in  
+        	// the compartment, map them into methodModels, then re-add them to the classModel
+        	// if user entered bad data, we assign default values w/ uniqMethodId
+        	List<Figure> methodFigures = target.getMethodsCompartment().getChildren();
+        	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
+        	
+        	// reinit class model's methodList
+        	target.getModel().setMethods(new ArrayList<UmlMethodModel>());
+        	for(Figure methodFigure : methodFigures) {
+        		String methodText = ((TextFigure)methodFigure).getText();
+        		
+            	// assess <accessmod>
+            	AccessModifier methodAccessModifier;
+            	if (methodText.startsWith("+")) {
+            		methodAccessModifier = AccessModifier.Public;
+            	}
+            	else if (methodText.startsWith("-")) {
+            		methodAccessModifier = AccessModifier.Private;
+            	}
+            	else if (methodText.startsWith("#")) {
+            		methodAccessModifier = AccessModifier.Protected;
+            	}
+            	else methodAccessModifier = AccessModifier.Private;
+        		
+        		// assess <name> : <type>
+        		String methodType;
+        		String methodName;
+            	if (methodText.indexOf(':') == -1) {
+            		methodType = "Object";
+            		
+            		Matcher m = p.matcher(methodText.substring(0));
+            		m.find();
+            		methodName = m.group();
+            	}
+            	else {
+            		//TODO: use fully qualified java identifier pattern
+                	Matcher m = p.matcher(methodText.substring(methodText.indexOf(':')));
+                	m.find();
+                	methodType = m.group();
+            		
+                	m = p.matcher(methodText.substring(0, methodText.indexOf(':')));
+                	m.find();
+                	methodName = m.group();
+            	}
+            	
+            	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodName, new ArrayList<UmlAttributeModel>());
+            	try {
+            		target.getModel().addMethod(remappedMethod);
+            	} catch (Exception mapException) {
+            		// something failed, supply defaults for user revision
+            		remappedMethod = new UmlMethodModel
+            				(AccessModifier.Public, "newMethod" + target.uniqMethodId, new ArrayList<UmlAttributeModel>());
+            	}
+            	((TextFigure)methodFigure).setText
+            		(methodAccessModifier.getSymbol() + " " + remappedMethod.getName() + " : " + remappedMethod.getReturnType());
+        	}
         }
     }
     
@@ -346,7 +403,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     @Override
     public Collection<Action> getActions(Point2D.Double p) {
     	Collection<Action> actions = new ArrayList<Action>();
-    	actions.add(new AbstractAction(null) {
+    	actions.add(new AbstractAction("Add Attribute") {
     		public final static String id = "edit.addAttribute";
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -360,7 +417,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 		        changed();
 			}
     	});
-    	actions.add(new AbstractAction(null) {
+    	actions.add(new AbstractAction("Add Method") {
     		public final static String id = "edit.addMethod";
 			@Override
 			public void actionPerformed(ActionEvent e) {
