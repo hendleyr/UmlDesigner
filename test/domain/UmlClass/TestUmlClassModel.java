@@ -30,8 +30,8 @@ public class TestUmlClassModel{
 		anotherAttribute = new UmlAttributeModel(AccessModifier.Private, "anotherAttribute", "Object");
 		nonexistentAttribute = new UmlAttributeModel(AccessModifier.Private, "nonexistentAttribute", "Object");
 		testMethod = new UmlMethodModel();
-		anotherMethod = new UmlMethodModel(AccessModifier.Private, "anotherMethod", new ArrayList<UmlAttributeModel>());
-		nonexistentMethod = new UmlMethodModel(AccessModifier.Private, "nonexistentMethod", new ArrayList<UmlAttributeModel>());
+		anotherMethod = new UmlMethodModel(AccessModifier.Private, "Object", "anotherMethod", new ArrayList<UmlAttributeModel>());
+		nonexistentMethod = new UmlMethodModel(AccessModifier.Private, "Object", "nonexistentMethod", new ArrayList<UmlAttributeModel>());
 	}
 
 	@Test

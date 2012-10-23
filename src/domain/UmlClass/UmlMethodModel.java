@@ -10,10 +10,10 @@ public class UmlMethodModel {
 	private List<UmlAttributeModel> _parameters;
 	
 	public UmlMethodModel() {
-		this(AccessModifier.Public, "newMethod", new ArrayList<UmlAttributeModel>());
+		this(AccessModifier.Public, "Object", "newMethod", new ArrayList<UmlAttributeModel>());
 	}
 	
-	public UmlMethodModel(AccessModifier accessMod, String name, List<UmlAttributeModel> params) {
+	public UmlMethodModel(AccessModifier accessMod, String _returnType, String name, List<UmlAttributeModel> params) {
 		this._accessModifier = accessMod;
 		this._name = name;
 		this._parameters = params;

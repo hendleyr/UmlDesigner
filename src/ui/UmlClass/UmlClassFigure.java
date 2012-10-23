@@ -38,6 +38,8 @@ import org.jhotdraw.xml.DOMInput;
 import org.jhotdraw.xml.DOMOutput;
 
 import domain.UmlClass.AccessModifier;
+import domain.UmlClass.AssociationType;
+import domain.UmlClass.UmlAssociationModel;
 import domain.UmlClass.UmlAttributeModel;
 import domain.UmlClass.UmlClassModel;
 import domain.UmlClass.UmlMethodModel;
@@ -47,6 +49,7 @@ import domain.UmlClass.UmlMethodModel;
 public class UmlClassFigure extends GraphicalCompositeFigure {
 	private int uniqAttrId = 1;
 	private int uniqMethodId = 1;
+	
     private static class ClassNameAdapter extends FigureAdapter {
         private UmlClassFigure target;
 
@@ -57,6 +60,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         @Override
         public void figureChanged(FigureEvent e) {
         	// VERIFY AND MAP USER INPUT TO MODEL
+        	target.willChange();
         	TextFigure nameFigure = target.getNameFigure();        	        	
         	String text = nameFigure.getText();
         	
@@ -71,21 +75,16 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		modelAccessModifier = AccessModifier.Protected;
         	}
         	else modelAccessModifier = AccessModifier.Public;
+        	target.getModel().setAccessModifier(modelAccessModifier);
         	
         	Pattern p = Pattern.compile("([\\w]+\\.)*[\\w]+");
         	Matcher m = p.matcher(text);
-        	m.find();
-        	target.getModel().setAccessModifier(modelAccessModifier);
-        	if (m.group().length() > 0) {
-        		// found at least one valid identifier
-        		nameFigure.setText(modelAccessModifier.getSymbol() + " " + m.group());
-        		target.getModel().setName(m.group());
-        	}
-        	else {
-        		// regex failed to find a valid java identifer
-        		nameFigure.setText(modelAccessModifier.getSymbol() + " " + "newClass");
-        		target.getModel().setName("newClass");
-        	}
+        	m.find();      	
+        	
+        	if (m.group().length() > 0) target.getModel().setName(m.group());
+        	else target.getModel().setName("newClass");
+        	target.drawClass();
+        	target.changed();
         }
     }
 
@@ -95,13 +94,15 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         public AttributeAdapter(UmlClassFigure target) {
             this.target = target;
         }//TODO: split out these huge blocks
-
+        
         @Override
         public void figureChanged(FigureEvent e) {        	
         	// VERIFY AND MAP USER INPUT TO MODELS
         	// new strat: reinitialize the model's attr list; examine all text figures in  
         	// the compartment, map them into attrModels, then re-add them to the classModel
         	// if user entered bad data, we assign default values w/ uniqAttrId
+        	target.willChange();
+        	target.getAttributesCompartment().willChange();
         	List<Figure> attrFigures = target.getAttributesCompartment().getChildren();
         	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
         	
@@ -152,9 +153,13 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             		remappedAttr = new UmlAttributeModel
             				(AccessModifier.Private, "newAttribute" + target.uniqAttrId, "Object");
             	}
+            	attrFigure.willChange();
             	((TextFigure)attrFigure).setText
             		(attrAccessModifier.getSymbol() + " " + remappedAttr.getName() + " : " + remappedAttr.getType());
+            	attrFigure.changed();
         	}
+        	target.getAttributesCompartment().changed();
+        	target.changed();
     	}
     }
     
@@ -203,7 +208,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             		methodName = m.group();
             	}
             	else {
-            		//TODO: use fully qualified java identifier pattern
                 	Matcher m = p.matcher(methodText.substring(methodText.indexOf(':')));
                 	m.find();
                 	methodType = m.group();
@@ -213,16 +217,19 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
                 	methodName = m.group();
             	}
             	
-            	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodName, new ArrayList<UmlAttributeModel>());
+            	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodType, methodName, new ArrayList<UmlAttributeModel>());
             	try {
             		target.getModel().addMethod(remappedMethod);
             	} catch (Exception mapException) {
             		// something failed, supply defaults for user revision
             		remappedMethod = new UmlMethodModel
-            				(AccessModifier.Public, "newMethod" + target.uniqMethodId, new ArrayList<UmlAttributeModel>());
+            				(AccessModifier.Public, "Object", "newMethod" + target.uniqMethodId, new ArrayList<UmlAttributeModel>());
+            		target.getModel().addMethod(remappedMethod);
+            		++target.uniqMethodId;
             	}
             	((TextFigure)methodFigure).setText
             		(methodAccessModifier.getSymbol() + " " + remappedMethod.getName() + " : " + remappedMethod.getReturnType());
+            	//TODO: render parameter list as well
         	}
         }
     }
@@ -269,9 +276,9 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         attributesCompartment.set(LAYOUT_INSETS, insets);
         methodsCompartment.set(LAYOUT_INSETS, insets);
 
-        TextFigure nameFigure = new TextFigure("newClass");
+        TextFigure nameFigure = new TextFigure("+ newClass");
         nameCompartment.add(nameFigure);
-        nameFigure.addFigureListener(new ClassNameAdapter(this));
+        //nameFigure.addFigureListener(new ClassNameAdapter(this));
         
         String attrName = "newAttribute";
         String attrType = "Object";
@@ -279,14 +286,16 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         TextFigure attrFigure = new TextFigure(attrAccessMod.getSymbol() + " " + attrName + " : " + attrType);
         getModel().addAttribute(new UmlAttributeModel(attrAccessMod, attrName, attrType));        
         attributesCompartment.add(attrFigure);
-        attrFigure.addFigureListener(new AttributeAdapter(this));
+        //attrFigure.addFigureListener(new AttributeAdapter(this));
         
         AccessModifier methodAccessMod = AccessModifier.Public;
         String methodName = "newMethod";
+        String methodType = "Object";
+        List<UmlMethodModel> methodList = new ArrayList<UmlMethodModel>();
         List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
-        //getModel().addMethod(new UmlMethodModel(methodAccessMod, methodName, methodParams));
-        methodsCompartment.add(new TextFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")"));
-        //methodsCompartment.add(new TextFigure("+ newMethod()"));
+        methodList.add(new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams));
+        getModel().setMethods(methodList);
+        methodsCompartment.add(new TextFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")" + " : " + methodType));
         
         //ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
     }
@@ -296,7 +305,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     	TextFigure nameFigure = (TextFigure) nameCompartment.getChild(0);
     	return nameFigure;
     }
-    
     protected ListFigure getAttributesCompartment() {
     	ListFigure attributesCompartment = (ListFigure) this.getChild(2);
     	return attributesCompartment;
@@ -306,18 +314,63 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     	ListFigure methodsCompartment = (ListFigure) this.getChild(4);
     	return methodsCompartment;
     }
+
+	/**
+	 * @precondition	nameFigureCompartment has been initialized
+	 * @postcondition	nameFigure has been updated with info from model
+	 */
+    private void drawClass() {
+    	String className = getModel().getName();
+    	char classAccessMod = getModel().getAccessModifier().getSymbol();
+    	getNameFigure().setText(classAccessMod + " " + className);
+    	//TODO: associations?
+    }
+
+	/**
+	 * @precondition 	attributesCompartment has been initialized
+	 * @postcondition	new text figure has been added with info from model
+	 * @param 			attrModel	model info to display
+	 */
+    private void drawAttribute(UmlAttributeModel attrModel) {
+    	TextFigure attrFigure = new TextFigure(attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType());
+    	getAttributesCompartment().add(attrFigure);
+    	attrFigure.addFigureListener(new AttributeAdapter(this));
+    }
+    
+    /**
+	 * @precondition 				methodsCompartment has been initialized
+	 * @postcondition				new text figure has been added with info from model
+	 * @param 			methodModel	model info to display
+	 */
+    private void drawMethod(UmlMethodModel methodModel) {
+    	String text = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
+    	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
+    		if ( i == methodModel.getParameters().size() - 1) text += methodModel.getParameters().get(i).getType() + " " + methodModel.getParameters().get(i).getName();
+    		else text += methodModel.getParameters().get(i).getType() + " " + methodModel.getParameters().get(i).getName() + ", ";
+    	}
+    	text += ") : " + methodModel.getReturnType();
+    	TextFigure methodFigure = new TextFigure(text);
+    	getMethodsCompartment().add(methodFigure);
+    }
     
     @Override
     public UmlClassFigure clone() {
     	UmlClassFigure that = (UmlClassFigure) super.clone();
     	that.setModel(new UmlClassModel());
         that.myAssociationFigures = new HashSet<LineConnectionFigure>();
-        //that.getNameFigure().setText("newClass");
+        
         List<Figure> attrFigureList = that.getAttributesCompartment().getChildren();
         for(int i = 0; i < attrFigureList.size(); ++i) {
         	((TextFigure)attrFigureList.get(i)).addFigureListener(new AttributeAdapter(that));
         }
+        
+        List<Figure> methodFigureList = that.getMethodsCompartment().getChildren();
+        for(int i = 0; i < methodFigureList.size(); ++i) {
+        	((TextFigure)methodFigureList.get(i)).addFigureListener(new MethodAdapter(that));
+        }
+        
         that.getNameFigure().addFigureListener(new ClassNameAdapter(that));
+        
         return that;
     }
     
@@ -328,65 +381,89 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         out.addAttribute("y", r.y);
         writeAttributes(out);
         out.openElement("classModel");
+        	out.openElement("classAccessModifier");
+        		out.writeObject(getModel().getAccessModifier());
+        	out.closeElement();
         
-        out.openElement("classAccessModifier");
-        out.writeObject(getModel().getAccessModifier());
-        out.closeElement();
+	        out.openElement("className");
+	        	out.writeObject(getModel().getName());
+	        out.closeElement();
+	        
+	        out.openElement("classAssociations");
+		        for(UmlAssociationModel assoc : getModel().getAssociations()) {
+		        	out.openElement("assoc");
+			        	out.openElement("assocType");
+			        		out.writeObject(assoc.getType());
+			        	out.closeElement();
+			        	
+			        	out.openElement("assocTarget");
+			        		out.writeObject(assoc.getTarget());
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
         
-        out.openElement("className");
-        out.writeObject(getModel().getName());
-        out.closeElement();
+	        out.openElement("classAttributes");
+		        for(UmlAttributeModel attr : getModel().getAttributes()) {
+		        	out.openElement("attr");
+			        	out.openElement("attrAccessModifier");
+			        		out.writeObject(attr.getAccessModifier());
+			        	out.closeElement();
+			        	
+			        	out.openElement("attrName");
+			        		out.writeObject(attr.getName());
+			        	out.closeElement();
+			        	
+			        	out.openElement("attrType");
+			        		out.writeObject(attr.getType());
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
         
-        out.openElement("attributes");
-        for(UmlAttributeModel attr : getModel().getAttributes()) {
-        	out.openElement("attrAccessModifier");
-        	out.writeObject(attr.getAccessModifier());
-        	out.closeElement();
-        	
-        	out.openElement("attrName");
-        	out.writeObject(attr.getName());
-        	out.closeElement();
-        	
-        	out.openElement("attrType");
-        	out.writeObject(attr.getType());
-        	out.closeElement();
-        }
-        out.closeElement();
-        
-        out.openElement("methods");
-        for(UmlMethodModel method : getModel().getMethods()) {
-        	out.openElement("methodAccessModifier");
-        	out.writeObject(method.getAccessModifier());
-        	out.closeElement();
-        	
-        	out.openElement("methodType");
-        	out.writeObject(method.getReturnType());
-        	out.closeElement();
-        	
-        	out.openElement("methodName");
-        	out.writeObject(method.getName());
-        	out.closeElement();
-        	
-        	out.openElement("params");
-        	for(UmlAttributeModel param : method.getParameters()) {
-        		out.openElement("paramType");
-        		out.writeObject(param.getType());
-        		out.closeElement();
-        		
-        		out.openElement("paramName");
-        		out.writeObject(param.getName());
-        		out.closeElement();
-        	}
-        	out.closeElement();
-        }
-        out.closeElement();
-        
+	        out.openElement("methods");
+		        for(UmlMethodModel method : getModel().getMethods()) {
+		        	out.openElement("method");
+			        	out.openElement("methodAccessModifier");
+			        		out.writeObject(method.getAccessModifier());
+			        	out.closeElement();
+			        	
+			        	out.openElement("methodType");
+			        		out.writeObject(method.getReturnType());
+			        	out.closeElement();
+			        	
+			        	out.openElement("methodName");
+			        		out.writeObject(method.getName());
+			        	out.closeElement();
+			        	
+			        	out.openElement("params");
+				        	for(UmlAttributeModel param : method.getParameters()) {
+				        		out.openElement("param");
+					        		out.openElement("paramType");
+					        			out.writeObject(param.getType());
+					        		out.closeElement();
+					        		
+					        		out.openElement("paramName");
+					        			out.writeObject(param.getName());
+					        		out.closeElement();
+				        		out.closeElement();
+				        	}
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
+	        
         out.closeElement();
     }
-    
+
     @Override
     public void read(DOMInput in) throws IOException {
     	// TODO:
+    	// remove default text figures
+    	this.willChange();
+    	getAttributesCompartment().removeAllChildren();
+    	getMethodsCompartment().removeAllChildren();
+    	
         double x = in.getAttribute("x", 0d);
         double y = in.getAttribute("y", 0d);
         double w = in.getAttribute("w", 0d);
@@ -394,10 +471,90 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         setBounds(new Point2D.Double(x, y), new Point2D.Double(x + w, y + h));
         readAttributes(in);
         in.openElement("classModel");
-        in.openElement("className");
-        //setName((String) in.readObject());
+	        in.openElement("classAccessModifier");
+	        	getModel().setAccessModifier((AccessModifier)in.readObject());
+	        in.closeElement();
+	        in.openElement("className");
+	        	getModel().setName((String) in.readObject());
+	        in.closeElement();
+	        drawClass();
+	        
+	        in.openElement("classAssociations");
+	        	List<UmlAssociationModel> assocList = new ArrayList<UmlAssociationModel>();
+	        	for (int i = 0; i < in.getElementCount("assoc"); ++i) {
+	        		in.openElement("assoc");
+			        	in.openElement("assocType");
+			        		AssociationType assocType = (AssociationType) in.readObject();
+			        	in.closeElement();
+			        	in.openElement("assocTarget");
+			        		UmlClassModel assocTarget = (UmlClassModel) in.readObject();
+			        	in.closeElement();
+		        	in.closeElement();
+		        	getModel().addAssociation(assocTarget, assocType);
+	        	}
+	        	getModel().setAssociations(assocList);
+	        	// TODO: draw associations?
+	        in.closeElement();
+	        
+	        in.openElement("classAttributes");
+		        for(int i = 0; i < in.getElementCount("attr"); ++i) {
+		        	in.openElement("attr");
+			        	in.openElement("attrAccessModifier");
+			        		AccessModifier attrAccessMod = (AccessModifier) in.readObject();
+			        	in.closeElement();
+			        	
+			        	in.openElement("attrName");
+			        		String attrName = (String) in.readObject();
+			        	in.closeElement();
+			        	
+			        	in.openElement("attrType");
+			        		String attrType = (String) in.readObject();
+			        	in.closeElement();
+		        	in.closeElement();
+		        	UmlAttributeModel attrModel = new UmlAttributeModel(attrAccessMod, attrName, attrType);
+		        	getModel().addAttribute(attrModel);
+		        	drawAttribute(attrModel);
+		        }
+	        in.closeElement();
+	        
+	        in.openElement("methods");
+	        List<UmlMethodModel> methods = new ArrayList<UmlMethodModel>();
+	        for(int i = 0; i < in.getElementCount("method"); ++i) {
+	        	in.openElement("method");
+		        	in.openElement("methodAccessModifier");
+		        		AccessModifier methodAccessMod = (AccessModifier) in.readObject();
+		        	in.closeElement();
+		        	
+		        	in.openElement("methodType");
+		        		String methodType = (String) in.readObject();
+		        	in.closeElement();
+		        	
+		        	in.openElement("methodName");
+		        		String methodName = (String) in.readObject();
+		        	in.closeElement();
+		        	
+		        	in.openElement("params");
+		        	List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
+			        	for (int j = 0; j < in.getElementCount("param"); ++j) {		        		
+			        		in.openElement("paramType");
+			        			String paramType = (String) in.readObject();
+			        		in.closeElement();
+			        		
+			        		in.openElement("paramName");
+			        			String paramName = (String) in.readObject();
+			        		in.closeElement();
+			        		methodParams.add(new UmlAttributeModel(null, paramName, paramType));
+			        	}
+		        	in.closeElement();
+	        	in.closeElement();
+	        	UmlMethodModel methodModel = new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams);
+	        	methods.add(methodModel);
+	        	drawMethod(methodModel);
+	        }
+	        in.closeElement();
+	        getModel().setMethods(methods);
         in.closeElement();
-        in.closeElement();
+        this.changed();
     }
         
     @Override
@@ -408,11 +565,12 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
-				labels.configureAction(this, id);
+				//ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
+				//labels.configureAction(this, id);
 		        // add a new attribute text figure
-				getAttributesCompartment().add(new TextFigure("- newAttribute" + uniqAttrId + ": Object"));
-				//TODO: map to model
+				UmlAttributeModel attr = new UmlAttributeModel(AccessModifier.Private, "Object", "newAttribute" + uniqAttrId);
+				getModel().getAttributes().add(attr);
+				drawAttribute(attr);
 		        ++uniqAttrId;
 		        changed();
 			}
@@ -422,11 +580,11 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
-		        labels.configureAction(this, id);
+				//ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
+		        //labels.configureAction(this, id);
 				// add a new method text figure
-		        getMethodsCompartment().add(new TextFigure("+ newMethod" + uniqMethodId + "()"));
-		        //TODO: map to model
+				UmlMethodModel method = new UmlMethodModel(AccessModifier.Public, "Object", "newMethod" + uniqMethodId, new ArrayList<UmlAttributeModel>());
+				drawMethod(method);
 	        	++uniqMethodId;
 	        	changed();
 			}

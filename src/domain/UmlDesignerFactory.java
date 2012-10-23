@@ -10,6 +10,7 @@ import org.jhotdraw.xml.DefaultDOMFactory;
 import ui.UmlClass.SeparatorFigure;
 import ui.UmlClass.UmlClassFigure;
 import domain.UmlClass.AccessModifier;
+import domain.UmlClass.AssociationType;
 
 public class UmlDesignerFactory extends DefaultDOMFactory {
 	private final static Object[][] classTagArray = {
@@ -24,7 +25,8 @@ public class UmlDesignerFactory extends DefaultDOMFactory {
 	};
 	
 	private final static Object[][] enumTagArray = {
-		{ AccessModifier.class, "accessMod" }		
+		{ AccessModifier.class, "accessMod" },
+		{ AssociationType.class, "assocType" }
 	};
 	
     /** Creates a new instance. */
