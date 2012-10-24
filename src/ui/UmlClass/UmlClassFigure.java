@@ -10,7 +10,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -664,6 +666,32 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	        	changed();
 			}
     	});
+    	
+    	actions.add(new AbstractAction("Generate Code Skeleton File") {
+    		//public final static String id = "edit.addAttribute";
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//willChange();
+				
+				UmlClassFigure figure = new UmlClassFigure();
+				String output = figure.getModel().toString();
+				
+				String fileName = (model.getName() + ".java");
+
+				try {
+
+					PrintWriter outStream = new PrintWriter(fileName);
+
+					outStream.write(output);
+					outStream.close();
+				
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				}
+
+			}
+    	});
+
     	
     	return actions;        
     }
