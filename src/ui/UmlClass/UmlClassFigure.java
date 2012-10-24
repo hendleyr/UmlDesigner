@@ -177,6 +177,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         	// new strat: reinitialize the model's method list; examine all text figures in  
         	// the compartment, map them into methodModels, then re-add them to the classModel
         	// if user entered bad data, we assign default values w/ uniqMethodId
+        	target.willChange();
+        	target.getMethodsCompartment().willChange();
         	List<Figure> methodFigures = target.getMethodsCompartment().getChildren();
         	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
         	
@@ -198,95 +200,97 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             	}
             	else methodAccessModifier = AccessModifier.Private;
         		
-        		// assess <name>(<param>:<paramType>) : <type>
-        		String methodType;
-        		String methodName;
-        		int paramCount = 0;
+        	// assess <name>(<param>:<paramType>) : <type>
+        	String methodType;
+        	String methodName;
+        	int paramCount = 0;
+        	ArrayList<UmlAttributeModel> params = new ArrayList<UmlAttributeModel>();
         		
-        		//if user input does not have a valid set of open and close parentheses or has no colons,
-        		//assign default values
-        		if (methodText.indexOf('(') == -1 || methodText.indexOf(')') == -1 || 
-        				methodText.indexOf(':') == -1 || methodText.indexOf(')') < methodText.indexOf('(')) {
-        			methodType = "Object";
+        	//if user input does not have a valid set of open and close parentheses or has no colons,
+        	//assign default values
+        	if (methodText.indexOf('(') == -1 || methodText.indexOf(')') == -1 || 
+        			methodText.indexOf(':') == -1 || methodText.indexOf(')') < methodText.indexOf('(')) {
+        		methodType = "Object";
+        		
+        		Matcher m = p.matcher(methodText.substring(0));
+        		m.find();
+        		methodName = m.group();
+        	}
+        	else {
+        		String nameSubstring = methodText.substring(0, methodText.indexOf('('));
+        		String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
+        						methodText.indexOf(')'));
+        		String typeSubstring = methodText.substring(methodText.indexOf(':' + 1, methodText.indexOf(')')));
         			
-        			Matcher m = p.matcher(methodText.substring(0));
-        			m.find();
-        			methodName = m.group();
-        		}
-        		else {
-        			String nameSubstring = methodText.substring(0, methodText.indexOf('('));
-        			String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
-        														methodText.indexOf(')'));
-        			String typeSubstring = methodText.substring(methodText.indexOf(':',
-        														methodText.indexOf(')')));
+        		Matcher m = p.matcher(nameSubstring);
+        		m.find();
+        		methodName = m.group();
         			
-        			Matcher m = p.matcher(nameSubstring);
-        			m.find();
-        			methodName = m.group();
+        		m = p.matcher(typeSubstring);
+        		m.find();
+        		methodType = m.group();
         			
-        			m = p.matcher(typeSubstring);
-        			m.find();
-        			methodType = m.group();
+        		int commaIndex = paramSubstring.indexOf(',');
+        		String paramName;
+        		String paramType;
         			
-        			int commaIndex = paramSubstring.indexOf(',');
-        			String paramName1;
-        			String paramType1;
-        			
-        			//case for only 1 paramName; the rest of this could probably be more elegant but
-        			//this should do for our purposes.
-        			if (commaIndex == -1){
-        				if (paramSubstring.indexOf(':') == -1){
-        					
-        					m = p.matcher(paramSubstring);
-        					m.find();
-        					paramName1 = m.group();
-        					
-        					paramType1 = "Object";
-        				}
-        				else {
-        					m = p.matcher(paramSubstring.substring(0, paramSubstring.indexOf(':')));
-        					m.find();
-        					paramName1 = m.group();
-        					
-        					m = p.matcher(paramSubstring.substring(paramSubstring.indexOf(':')));
-        					m.find();
-        					paramType1 = m.group();
-        					
-        					UmlAttributeModel param1 = new UmlAttributeModel(AccessModifier.Private,
-        																	paramName1, paramType1);
-        				}
+        		//case for only 1 param; the rest of this could probably be more elegant but
+        		//this should do for our purposes.
+        		if (commaIndex == -1){
+        			paramCount = 1;
+        			if (paramSubstring.indexOf(':') == -1){
+        				
+        				m = p.matcher(paramSubstring);
+        				m.find();
+        				paramName = m.group();
+        				
+        				paramType = "Object";
         			}
         			else {
-        				int preLength = paramSubstring.length();
-        				String removedCommas = paramSubstring.replaceAll(",","");
-        				int numOfParams = preLength - removedCommas.length() + 1;
+        				m = p.matcher(paramSubstring.substring(0, paramSubstring.indexOf(':')));
+        				m.find();
+        				paramName = m.group();
         				
-        				for (int i = 1; i < numOfParams; i++){
-        					
-        				}
-        			}        			
+        				m = p.matcher(paramSubstring.substring(paramSubstring.indexOf(':')));
+        				m.find();
+        				paramType = m.group();
+        			}
+    				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
         		}
+        		//case for multiple params
+        		else {
+        			int preLength = paramSubstring.length();
+        			String removedCommas = paramSubstring.replaceAll(",","");
+        			paramCount = preLength - removedCommas.length() + 1;
+        			String curString;
+        			int curBegIndex = 0;
+        			
+        			for (int i = 1; i < paramCount; i++){
+        				curString = paramSubstring.substring(curBegIndex, paramSubstring.indexOf(',', curBegIndex));
+        				if (curString.indexOf(':') == -1) {
+           					m = p.matcher(curString);
+           					m.find();
+           					paramName = m.group();
+            					
+           					paramType = "Object";
+        				}
+        				else {
+           					m = p.matcher(paramSubstring.substring(0, curString.indexOf(':')));
+           					m.find();
+           					paramName = m.group();
+           					
+           					m = p.matcher(paramSubstring.substring(curString.indexOf(':')));
+           					m.find();
+           					paramType = m.group();
+        				}
+        				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
+        				curBegIndex = paramSubstring.indexOf(',', curBegIndex);
+        			}
+        		}        			
+        	}
         		
-        		
-        		/*Copied from attrModel; just here for my reference while I code this :)
-            	if (methodText.indexOf(':') == -1) {
-            		methodType = "Object";
-            		
-            		Matcher m = p.matcher(methodText.substring(0));
-            		m.find();
-            		methodName = m.group();
-            	}
-            	else {
-                	Matcher m = p.matcher(methodText.substring(methodText.indexOf(':')));
-                	m.find();
-                	methodType = m.group();
-            		
-                	m = p.matcher(methodText.substring(0, methodText.indexOf(':')));
-                	m.find();
-                	methodName = m.group();
-            	}*/
             	
-            	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodType, methodName, new ArrayList<UmlAttributeModel>());
+           	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodType, methodName, params);
             	try {
             		target.getModel().addMethod(remappedMethod);
             	} catch (Exception mapException) {
@@ -296,10 +300,18 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             		target.getModel().addMethod(remappedMethod);
             		++target.uniqMethodId;
             	}
+            	String paramString = "";
+            	for (UmlAttributeModel parameter : params){
+            		paramString = parameter.getName() + " : " + parameter.getType() + ", ";
+            	}
+            	methodFigure.willChange();
             	((TextFigure)methodFigure).setText
-            		(methodAccessModifier.getSymbol() + " " + remappedMethod.getName() + " : " + remappedMethod.getReturnType());
-            	//TODO: render parameter list as well
+            		(methodAccessModifier.getSymbol() + " " + remappedMethod.getName() + "(" + paramString +
+            									")" + " : " + remappedMethod.getReturnType());
+            	methodFigure.changed();
         	}
+        	target.getMethodsCompartment().changed();
+        	target.changed();
         }
     }
     
