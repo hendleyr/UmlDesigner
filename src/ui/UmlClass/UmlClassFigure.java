@@ -227,7 +227,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			else {
         			String typeSubstring = afterParen.substring(methodText.indexOf(':' + 1));
         			
-        			m = p.matcher(typeSubstring);
+        			Matcher m = p.matcher(typeSubstring);
         			m.find();
         			methodType = m.group();
 			}
