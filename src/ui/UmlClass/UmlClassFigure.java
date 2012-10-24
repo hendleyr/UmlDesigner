@@ -220,15 +220,21 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		String nameSubstring = methodText.substring(0, methodText.indexOf('('));
         		String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
         						methodText.indexOf(')'));
-        		String typeSubstring = methodText.substring(methodText.indexOf(':' + 1, methodText.indexOf(')')));
+			String afterParen = methodText.substring(methodText.indexOf(')'));
+			if (afterParen.indexOf(':') == -1){
+				methodType = "Object";	
+			}
+			else {
+        			String typeSubstring = afterParen.substring(methodText.indexOf(':' + 1));
         			
+        			m = p.matcher(typeSubstring);
+        			m.find();
+        			methodType = m.group();
+			}
+
         		Matcher m = p.matcher(nameSubstring);
         		m.find();
         		methodName = m.group();
-        			
-        		m = p.matcher(typeSubstring);
-        		m.find();
-        		methodType = m.group();
         			
         		int commaIndex = paramSubstring.indexOf(',');
         		String paramName;
