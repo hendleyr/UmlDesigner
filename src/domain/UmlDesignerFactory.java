@@ -6,7 +6,15 @@ import org.jhotdraw.draw.GroupFigure;
 import org.jhotdraw.draw.ListFigure;
 import org.jhotdraw.draw.TextAreaFigure;
 import org.jhotdraw.draw.TextFigure;
+import org.jhotdraw.draw.connector.ChopRectangleConnector;
+import org.jhotdraw.draw.connector.LocatorConnector;
+import org.jhotdraw.draw.decoration.ArrowTip;
+import org.jhotdraw.draw.locator.RelativeLocator;
+import org.jhotdraw.samples.pert.figures.DependencyFigure;
 import org.jhotdraw.xml.DefaultDOMFactory;
+
+import ui.UmlClass.AggregationDecorationFigure;
+import ui.UmlClass.AssociationFigure;
 import ui.UmlClass.SeparatorFigure;
 import ui.UmlClass.UmlClassFigure;
 import domain.UmlClass.AccessModifier;
@@ -21,7 +29,14 @@ public class UmlDesignerFactory extends DefaultDOMFactory {
         { TextFigure.class, "text" },
         { GroupFigure.class, "g" },
         { TextAreaFigure.class, "ta" },
-        { SeparatorFigure.class, "separator" }
+        { SeparatorFigure.class, "separator" },
+        
+        { AssociationFigure.class, "association" },
+        { ChopRectangleConnector.class, "rectConnector" },
+        { LocatorConnector.class, "locConnector" },
+        { RelativeLocator.class, "relativeLocator" },
+        { ArrowTip.class, "arrowTip" },
+        { AggregationDecorationFigure.class, "aggregationDecoration" }
 	};
 	
 	private final static Object[][] enumTagArray = {

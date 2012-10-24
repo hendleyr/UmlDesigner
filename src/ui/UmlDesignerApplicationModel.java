@@ -34,8 +34,10 @@ import org.jhotdraw.draw.tool.ConnectionTool;
 import org.jhotdraw.draw.tool.CreationTool;
 import org.jhotdraw.draw.tool.TextAreaCreationTool;
 import org.jhotdraw.draw.tool.Tool;
+import org.jhotdraw.samples.pert.figures.DependencyFigure;
 import org.jhotdraw.util.ResourceBundleUtil;
 
+import ui.UmlClass.AssociationFigure;
 import ui.UmlClass.UmlClassFigure;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -104,9 +106,9 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
         tb.setName(drawLabels.getString("window.drawToolBar.title"));
         list.add(tb);
         tb = new JToolBar();
-        ButtonFactory.addAttributesButtonsTo(tb, editor);
-        tb.setName(drawLabels.getString("window.attributesToolBar.title"));
-        list.add(tb);
+//        ButtonFactory.addAttributesButtonsTo(tb, editor);
+//        tb.setName(drawLabels.getString("window.attributesToolBar.title"));
+//        list.add(tb);
         tb = new JToolBar();
         ButtonFactory.addAlignmentButtonsTo(tb, editor);
         tb.setName(drawLabels.getString("window.alignmentToolBar.title"));
@@ -130,7 +132,7 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
         attributes.put(AttributeKeys.STROKE_COLOR, Color.black);
         attributes.put(AttributeKeys.TEXT_COLOR, Color.black);
         ButtonFactory.addToolTo(tb, editor, new CreationTool(new UmlClassFigure(), attributes), "edit.createUmlClassFigure", labels);
-
+        ButtonFactory.addToolTo(tb, editor, new ConnectionTool(new AssociationFigure(), attributes), "edit.createAssociation", labels);
         attributes = new HashMap<AttributeKey, Object>();
         attributes.put(AttributeKeys.STROKE_COLOR, new Color(0x000099));
         tb.addSeparator();

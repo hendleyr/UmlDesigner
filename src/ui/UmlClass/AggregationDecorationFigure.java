@@ -36,7 +36,7 @@ public class AggregationDecorationFigure extends AbstractLineDecoration {
      */
     public AggregationDecorationFigure(int newSize) {
     	// constants for super constructor
-    	super(true, true, true);
+    	super(false, true, true);
         setSize(newSize);
     }
     
@@ -114,15 +114,11 @@ public class AggregationDecorationFigure extends AbstractLineDecoration {
 
 	@Override
 	protected Double getDecoratorPath(Figure f) {
-		// TODO Auto-generated method stub
-		// copy the strategy from "outline" above
-		return null;
+		return new Double(this.outline(0, 0, 10, 10));
 	}
 
 	@Override
 	protected double getDecoratorPathRadius(Figure f) {
-		// TODO Auto-generated method stub
-		// try returning a constant > 0
-		return 0;
+		return 1;
 	}
 }

@@ -26,6 +26,7 @@ public class UmlClassModel {
 
 	public UmlAssociationModel addAssociation(UmlClassModel target,
 			AssociationType associationType) {
+		if (target == null || associationType == null) return null;
 		// if associations set includes a UmlAssociationModel with SAME target
 		// and a
 		// DIFFERENT associationType, throw exception
@@ -43,8 +44,6 @@ public class UmlClassModel {
 				return null;
 			}
 		}
-		// above could be done in like 20seconds if java supported lambda
-		// expressions. fml
 
 		// add new UmlAssociationModel
 		UmlAssociationModel newAssociationModel = new UmlAssociationModel(
@@ -178,9 +177,7 @@ public class UmlClassModel {
 		return false;
 	}
 
-	// TODO: toString, returning the text to go into a filestream to construct a
 	// code skeleton
-	
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		
