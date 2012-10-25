@@ -221,8 +221,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
         						methodText.indexOf(')'));
         		String afterParen = methodText.substring(methodText.indexOf(')'));
-        		System.out.println("DEBUG: nameSubstring = " + nameSubstring);
-        		System.out.println("DEBUG: paramSubstring = " + paramSubstring);
         		
         		if (afterParen.indexOf(':') == -1){
         			methodType = "Object";	
@@ -273,7 +271,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		else {
         			String[] paramStrings = paramSubstring.split(",");
         			for (String param : paramStrings){
-        				System.out.println("BEFORE: " + param);
         				if (param.indexOf(':') == -1){
         					m = p.matcher(param);
         					m.find();
@@ -289,7 +286,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         					m.find();
         					paramType = m.group();
         				}
-        				System.out.println("AFTER: " + param);
         				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
         			}
         		}        			
