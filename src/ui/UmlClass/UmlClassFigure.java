@@ -225,7 +225,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 				methodType = "Object";	
 			}
 			else {
-        			String typeSubstring = afterParen.substring(methodText.indexOf(':' + 1));
+        			String typeSubstring = afterParen.substring(afterParen.indexOf(':'));
         			
         			Matcher m = p.matcher(typeSubstring);
         			m.find();
@@ -239,10 +239,14 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		int commaIndex = paramSubstring.indexOf(',');
         		String paramName;
         		String paramType;
-        			
+        		
+        		if (paramSubstring.equals("")){
+        			paramCount = 0;
+        		}
+        		
         		//case for only 1 param; the rest of this could probably be more elegant but
         		//this should do for our purposes.
-        		if (commaIndex == -1){
+        		else if (commaIndex == -1){
         			paramCount = 1;
         			if (paramSubstring.indexOf(':') == -1){
         				
@@ -263,7 +267,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         			}
     				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
         		}
-        		//case for multiple params
+        		//TODO : minor things to change in case for multiple params (not looping properly)
         		else {
         			int preLength = paramSubstring.length();
         			String removedCommas = paramSubstring.replaceAll(",","");
@@ -659,6 +663,9 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     }
         
     @Override
+    //TODO : Move code from figureChanged methods in the adapters above to actionPerformed instead so that
+    //the class names, attributes, and methods will hopefully update as soon as they are entered rather than
+    //when the object is moved.
     public Collection<Action> getActions(Point2D.Double p) {
     	Collection<Action> actions = new ArrayList<Action>();
     	actions.add(new AbstractAction("Add Attribute") {
