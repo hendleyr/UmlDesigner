@@ -14,19 +14,21 @@ import javax.swing.Action;
 import static org.jhotdraw.draw.AttributeKeys.*;
 import org.jhotdraw.draw.*;
 
-import domain.UmlClass.AccessModifier;
 import domain.UmlClass.AssociationType;
 import domain.UmlClass.UmlAssociationModel;
-import domain.UmlClass.UmlAttributeModel;
-import domain.UmlClass.UmlMethodModel;
 
 @SuppressWarnings("serial")
 public class AssociationFigure extends LineConnectionFigure {
 	private UmlAssociationModel associationModel;
+	private UmlClassFigure startFigure;
+	private UmlClassFigure endFigure;
+	boolean isBidirectional;
 	
     /** Creates a new instance. */
     public AssociationFigure() {
     	associationModel = new UmlAssociationModel(null, null);
+    	isBidirectional = false;
+    	
         set(STROKE_COLOR, new Color(0x000099));
         set(AttributeKeys.FILL_COLOR, Color.WHITE);
         set(STROKE_WIDTH, 1d);
@@ -47,12 +49,11 @@ public class AssociationFigure extends LineConnectionFigure {
     @Override
     public boolean canConnect(Connector start, Connector end) {
     	if ((start.getOwner() instanceof UmlClassFigure) && (end.getOwner() instanceof UmlClassFigure)) {
-    		UmlClassFigure startFigure = (UmlClassFigure) start.getOwner();
-    		UmlClassFigure endFigure = (UmlClassFigure) end.getOwner();
+    		UmlClassFigure sf = (UmlClassFigure) start.getOwner();
+    		UmlClassFigure ef = (UmlClassFigure) end.getOwner();
     		
-    		// TODO: check for inheritance cycle
     		if (associationModel.getType() == AssociationType.Inheritance) {
-    			if (startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) return false;
+    			if (sf.getModel().hasInheritanceCycle(ef.getModel())) return false;
     		}
     		
     		return true;
@@ -74,7 +75,8 @@ public class AssociationFigure extends LineConnectionFigure {
     	UmlClassFigure sf = (UmlClassFigure) start.getOwner();
     	UmlClassFigure ef = (UmlClassFigure) end.getOwner();
     	    	
-    	sf.getModel().removeAssociation(ef.getModel());        
+    	sf.getModel().removeAssociation(ef.getModel());
+    	if (isBidirectional) ef.getModel().removeAssociation(sf.getModel());
     }
 
     /**
@@ -88,6 +90,11 @@ public class AssociationFigure extends LineConnectionFigure {
 
     	associationModel.setTarget(ef.getModel());    	
         sf.getModel().addAssociation(associationModel.getTarget(), associationModel.getType());
+        if (isBidirectional) ef.getModel().addAssociation(sf.getModel(), associationModel.getType());
+        
+        // store an internal reference to class figures for use in actions later
+        startFigure = sf;
+        endFigure = ef;
     }
 
     @Override
@@ -110,18 +117,24 @@ public class AssociationFigure extends LineConnectionFigure {
 			public void actionPerformed(ActionEvent e) {
 				willChange();
 				// change end decoration to white diamond
-				set(END_DECORATION, new AggregationDecorationFigure());
+				set(END_DECORATION, new ArrowTip(1, 20.0 , 20.0, false, true, true));
 		        changed();
 			}
     	});
     	actions.add(new AbstractAction(AssociationType.Inheritance.toString()) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				willChange();
-				// TODO: add source attribute on associationModel to enable graceful validation
-				// change end decoration to white arrow
-				set(END_DECORATION, new ArrowTip(0.35, 20.0 , 20.0, false, true, true));
-	        	changed();
+				if(!startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) {
+					willChange();
+					// change end decoration to white arrow
+					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, false, true, true));
+					
+					// destroy bidirectional
+					endFigure.getModel().removeAssociation(startFigure.getModel());
+					isBidirectional = false;
+					set(START_DECORATION, null);
+		        	changed();
+				}
 			}
     	});
     	actions.add(new AbstractAction(AssociationType.Dependency.toString()) {
@@ -133,17 +146,23 @@ public class AssociationFigure extends LineConnectionFigure {
 	        	changed();
 			}
     	});
+    	actions.add(new AbstractAction("Bidirectional") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				willChange();
+				isBidirectional = !isBidirectional;
+				// change start decoration to matching small arrow
+				if(associationModel.getType() != AssociationType.Inheritance && isBidirectional) {
+					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+					endFigure.getModel().addAssociation(startFigure.getModel(), associationModel.getType());
+				}			
+				else {
+					set(START_DECORATION, null);
+					endFigure.getModel().removeAssociation(startFigure.getModel());
+				}
+	        	changed();
+			}
+    	});
     	return actions;
-    }
-    
-    @Override
-    public void removeNotify(Drawing d) {
-        if (getStartFigure() != null) {
-//            ((UmlClassFigure) getStartFigure()).removeDependency(this);
-        }
-        if (getEndFigure() != null) {
-//            ((UmlClassFigure) getEndFigure()).removeDependency(this);
-        }
-        super.removeNotify(d);
     }
 }
