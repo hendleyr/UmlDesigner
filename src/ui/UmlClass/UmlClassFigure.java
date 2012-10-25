@@ -220,17 +220,21 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		String nameSubstring = methodText.substring(0, methodText.indexOf('('));
         		String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
         						methodText.indexOf(')'));
-			String afterParen = methodText.substring(methodText.indexOf(')'));
-			if (afterParen.indexOf(':') == -1){
-				methodType = "Object";	
-			}
-			else {
+        		String afterParen = methodText.substring(methodText.indexOf(')'));
+        		System.out.println("DEBUG: nameSubstring = " + nameSubstring);
+        		System.out.println("DEBUG: paramSubstring = " + paramSubstring);
+        		
+        		if (afterParen.indexOf(':') == -1){
+        			methodType = "Object";	
+        		}
+        		else {
         			String typeSubstring = afterParen.substring(afterParen.indexOf(':'));
+        			System.out.println("DEBUG: typeSubstring = " + typeSubstring);
         			
         			Matcher m = p.matcher(typeSubstring);
         			m.find();
         			methodType = m.group();
-			}
+        		}
 
         		Matcher m = p.matcher(nameSubstring);
         		m.find();
@@ -269,14 +273,21 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		}
         		//TODO : minor things to change in case for multiple params (not looping properly)
         		else {
+        			//count the number of separate parameters separated by commas
         			int preLength = paramSubstring.length();
         			String removedCommas = paramSubstring.replaceAll(",","");
         			paramCount = preLength - removedCommas.length() + 1;
         			String curString;
         			int curBegIndex = 0;
         			
-        			for (int i = 1; i < paramCount; i++){
-        				curString = paramSubstring.substring(curBegIndex, paramSubstring.indexOf(',', curBegIndex));
+        			for (int i = 1; i <= paramCount; i++){
+        				if (paramSubstring.indexOf(',', curBegIndex + 1) != -1){
+        					curString = paramSubstring.substring(curBegIndex, paramSubstring.indexOf(',', curBegIndex) + 1);
+        				}
+        				else{
+        					curString = paramSubstring.substring(curBegIndex + 1);
+        				}
+        				System.out.println("DEBUG : curString = " + curString);
         				if (curString.indexOf(':') == -1) {
            					m = p.matcher(curString);
            					m.find();
@@ -285,16 +296,16 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
            					paramType = "Object";
         				}
         				else {
-           					m = p.matcher(paramSubstring.substring(0, curString.indexOf(':')));
+           					m = p.matcher(curString.substring(0, curString.indexOf(':')));
            					m.find();
            					paramName = m.group();
            					
-           					m = p.matcher(paramSubstring.substring(curString.indexOf(':')));
+           					m = p.matcher(curString.substring(curString.indexOf(':')));
            					m.find();
            					paramType = m.group();
         				}
         				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
-        				curBegIndex = paramSubstring.indexOf(',', curBegIndex);
+        				curBegIndex = paramSubstring.indexOf(',', curBegIndex + 1);
         			}
         		}        			
         	}
