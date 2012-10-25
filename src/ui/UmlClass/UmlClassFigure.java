@@ -203,7 +203,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         	// assess <name>(<param>:<paramType>) : <type>
         	String methodType;
         	String methodName;
-        	int paramCount = 0;
+
         	ArrayList<UmlAttributeModel> params = new ArrayList<UmlAttributeModel>();
         		
         	//if user input does not have a valid set of open and close parentheses or has no colons,
@@ -245,13 +245,11 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		String paramType;
         		
         		if (paramSubstring.equals("")){
-        			paramCount = 0;
         		}
         		
         		//case for only 1 param; the rest of this could probably be more elegant but
         		//this should do for our purposes.
         		else if (commaIndex == -1){
-        			paramCount = 1;
         			if (paramSubstring.indexOf(':') == -1){
         				
         				m = p.matcher(paramSubstring);
@@ -271,41 +269,28 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         			}
     				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
         		}
-        		//TODO : minor things to change in case for multiple params (not looping properly)
+        		//case for multiple parameters
         		else {
-        			//count the number of separate parameters separated by commas
-        			int preLength = paramSubstring.length();
-        			String removedCommas = paramSubstring.replaceAll(",","");
-        			paramCount = preLength - removedCommas.length() + 1;
-        			String curString;
-        			int curBegIndex = 0;
-        			
-        			for (int i = 1; i <= paramCount; i++){
-        				if (paramSubstring.indexOf(',', curBegIndex + 1) != -1){
-        					curString = paramSubstring.substring(curBegIndex, paramSubstring.indexOf(',', curBegIndex) + 1);
-        				}
-        				else{
-        					curString = paramSubstring.substring(curBegIndex + 1);
-        				}
-        				System.out.println("DEBUG : curString = " + curString);
-        				if (curString.indexOf(':') == -1) {
-           					m = p.matcher(curString);
-           					m.find();
-           					paramName = m.group();
-            					
-           					paramType = "Object";
+        			String[] paramStrings = paramSubstring.split(",");
+        			for (String param : paramStrings){
+        				System.out.println("BEFORE: " + param);
+        				if (param.indexOf(':') == -1){
+        					m = p.matcher(param);
+        					m.find();
+        					paramName = m.group();
+        					paramType = "Object";
         				}
         				else {
-           					m = p.matcher(curString.substring(0, curString.indexOf(':')));
-           					m.find();
-           					paramName = m.group();
-           					
-           					m = p.matcher(curString.substring(curString.indexOf(':')));
-           					m.find();
-           					paramType = m.group();
+        					m = p.matcher(param.substring(0, param.indexOf(':')));
+        					m.find();
+        					paramName = m.group();
+        					
+        					m = p.matcher(param.substring(param.indexOf(':')));
+        					m.find();
+        					paramType = m.group();
         				}
+        				System.out.println("AFTER: " + param);
         				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
-        				curBegIndex = paramSubstring.indexOf(',', curBegIndex + 1);
         			}
         		}        			
         	}
@@ -322,8 +307,14 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
             		++target.uniqMethodId;
             	}
             	String paramString = "";
-            	for (UmlAttributeModel parameter : params){
-            		paramString = parameter.getName() + " : " + parameter.getType() + ", ";
+            	if (params.size() == 1){
+            		paramString = params.get(0).getName() + " : " + params.get(0).getType();
+            	}
+            	else if (params.size() > 1){
+            		for (int i = 0; i < params.size() - 1; i++){
+            			paramString += params.get(i).getName() + " : " + params.get(i).getType() + ", ";
+            		}
+            		paramString += params.get(params.size() - 1).getName() + " : " + params.get(params.size() - 1).getType();
             	}
             	methodFigure.willChange();
             	((TextFigure)methodFigure).setText
