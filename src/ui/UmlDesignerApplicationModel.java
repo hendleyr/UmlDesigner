@@ -4,19 +4,25 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 
 import org.jhotdraw.app.Application;
@@ -30,6 +36,7 @@ import org.jhotdraw.app.action.view.ToggleViewPropertyAction;
 import org.jhotdraw.app.action.view.ViewPropertyAction;
 import org.jhotdraw.draw.AttributeKey;
 import org.jhotdraw.draw.AttributeKeys;
+import org.jhotdraw.draw.DefaultDrawing;
 import org.jhotdraw.draw.DefaultDrawingEditor;
 import org.jhotdraw.draw.Drawing;
 import org.jhotdraw.draw.DrawingEditor;
@@ -37,12 +44,15 @@ import org.jhotdraw.draw.DrawingView;
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.TextAreaFigure;
 import org.jhotdraw.draw.action.ButtonFactory;
+import org.jhotdraw.draw.io.DOMStorableInputOutputFormat;
 import org.jhotdraw.draw.tool.ConnectionTool;
 import org.jhotdraw.draw.tool.CreationTool;
 import org.jhotdraw.draw.tool.TextAreaCreationTool;
 import org.jhotdraw.draw.tool.Tool;
 import org.jhotdraw.samples.pert.figures.DependencyFigure;
 import org.jhotdraw.util.ResourceBundleUtil;
+
+import domain.UmlDesignerFactory;
 
 import ui.UmlClass.AssociationFigure;
 import ui.UmlClass.UmlClassFigure;
@@ -88,6 +98,7 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		ActionMap m = super.createActionMap(a, v);
 		ResourceBundleUtil drawLabels = ResourceBundleUtil
 				.getBundle("org.jhotdraw.draw.Labels");
+		ResourceBundleUtil ourLabels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
 		AbstractAction aa;
 		m.put(ExportFileAction.ID, new ExportFileAction(a, v));
 		m.put("view.toggleGrid", aa = new ToggleViewPropertyAction(a, v,
@@ -99,6 +110,22 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 							sf)));
 			aa.putValue(Action.NAME, (int) (sf * 100) + " %");
 		}
+		
+		m.put("edit.observerPattern", aa = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// 
+				DOMStorableInputOutputFormat dom = 
+						new DOMStorableInputOutputFormat(new UmlDesignerFactory());
+				try {
+					dom.read(new File("observerPattern.xml"), sharedEditor.getActiveView().getDrawing(), false);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
+			}});
+		ourLabels.configureAction(aa, "edit.observerPattern");
+		
 		return m;
 	}
 
@@ -158,11 +185,21 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		tb.addSeparator();
 		ButtonFactory.addToolTo(tb, editor, new TextAreaCreationTool(
 				new TextAreaFigure()), "edit.createTextArea", drawLabels);
+		
+		//ButtonFactory.addToolTo(tb, editor, new CreationTool(), "edit.observerPattern", drawLabels)
 	}
 
 	@Override
 	protected MenuBuilder createMenuBuilder() {
 		return new DefaultMenuBuilder() {
+			
+		    @Override
+		    public void addOtherEditItems(JMenu m, Application app, @Nullable View v) {
+		    	ActionMap am = app.getActionMap(v);
+		    	JMenuItem item = new JMenuItem(am.get("edit.observerPattern"));
+		    	item.setAction(am.get("edit.observerPattern"));
+		    	m.add(item);
+		    }
 			@Override
 			public void addOtherViewItems(JMenu m, Application app,
 					@Nullable View v) {
@@ -191,28 +228,15 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		return sharedEditor;
 	}
 
-	public void exportCodeSkeletons(Drawing d) {
-		
-		UmlClassFigure figure = new UmlClassFigure();
-		
-		LinkedHashSet<Figure> s = new LinkedHashSet<Figure>();
-		Iterator<Figure> iterator = s.iterator();
-		
-		//for every class figure in drawing d do
-		while(iterator.hasNext()) {
-			String output = figure.getModel().toString();
-			String fileName = (figure.getModel().getName() + ".java");
-
-			try {
-
-				PrintWriter outStream = new PrintWriter(fileName);
-
-				outStream.write(output);
-				outStream.close();
-			
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} 
-		}
+	public void exportCodeSkeletons(Drawing d ) {
+				
+		//getFiguresFrontToBack();
+//		LinkedList<Figure> iterator = d.iterator();
+//		
+//		//for every class figure in drawing d do
+//		while(iterator.isEmpty()==false) {
+//			String output = d.getModel().toString();
+// 
+//		}
     }
 }

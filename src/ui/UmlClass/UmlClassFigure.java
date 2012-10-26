@@ -673,8 +673,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			public void actionPerformed(ActionEvent e) {
 				//willChange();
 				
-				UmlClassFigure figure = new UmlClassFigure();
-				String output = figure.getModel().toString();
+				String output = getModel().toString();
 				
 				String fileName = (model.getName() + ".java");
 
