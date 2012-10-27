@@ -2,6 +2,7 @@ package ui.UmlClass;
 
 import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
@@ -48,6 +49,7 @@ public class AssociationFigure extends LineConnectionFigure {
      */
     @Override
     public boolean canConnect(Connector start, Connector end) {
+    	if (start.getOwner().equals(end.getOwner())) return false;
     	if ((start.getOwner() instanceof UmlClassFigure) && (end.getOwner() instanceof UmlClassFigure)) {
     		UmlClassFigure sf = (UmlClassFigure) start.getOwner();
     		UmlClassFigure ef = (UmlClassFigure) end.getOwner();
@@ -118,6 +120,7 @@ public class AssociationFigure extends LineConnectionFigure {
 				willChange();
 				// change end decoration to white diamond
 				set(END_DECORATION, new ArrowTip(1, 20.0 , 20.0, false, true, true));
+				associationModel.setType(AssociationType.Aggregation);
 		        changed();
 			}
     	});
@@ -128,6 +131,7 @@ public class AssociationFigure extends LineConnectionFigure {
 					willChange();
 					// change end decoration to white arrow
 					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, false, true, true));
+					associationModel.setType(AssociationType.Inheritance);
 					
 					// destroy bidirectional
 					endFigure.getModel().removeAssociation(startFigure.getModel());
@@ -143,6 +147,17 @@ public class AssociationFigure extends LineConnectionFigure {
 				willChange();
 				// change end decoration to default small arrow
 				set(END_DECORATION, new ArrowTip());
+				associationModel.setType(AssociationType.Dependency);
+	        	changed();
+			}
+    	});
+    	actions.add(new AbstractAction(AssociationType.Association.toString()) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				willChange();
+				// change end decoration to no arrow
+				set(END_DECORATION, null);
+				associationModel.setType(AssociationType.Association);
 	        	changed();
 			}
     	});

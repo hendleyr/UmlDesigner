@@ -36,8 +36,6 @@ import org.jhotdraw.util.ResourceBundleUtil;
 
 import domain.UmlDesignerFactory;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 @SuppressWarnings("serial")
 public class UmlDesignerView extends AbstractView {
 	public final static String GRID_VISIBLE_PROPERTY = "gridVisible";
