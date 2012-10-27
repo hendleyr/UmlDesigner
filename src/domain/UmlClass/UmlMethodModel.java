@@ -13,8 +13,9 @@ public class UmlMethodModel {
 		this(AccessModifier.Public, "Object", "newMethod", new ArrayList<UmlAttributeModel>());
 	}
 	
-	public UmlMethodModel(AccessModifier accessMod, String _returnType, String name, List<UmlAttributeModel> params) {
+	public UmlMethodModel(AccessModifier accessMod, String returnType, String name, List<UmlAttributeModel> params) {
 		this._accessModifier = accessMod;
+		this._returnType = returnType;
 		this._name = name;
 		this._parameters = params;
 	}
