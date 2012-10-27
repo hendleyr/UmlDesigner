@@ -214,51 +214,6 @@ public class UmlClassModel {
 		return output;
 	}
 	
-	public void makeSkelCode(UmlClassModel target) {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append(target.getAccessModifier().toString().toLowerCase()).append(" class ")
-				.append(target.getName()).append(" ");
-
-		for (UmlAssociationModel association : _associations) {
-			if (association.getType().equals("Inheritance")) {
-				sb.append("Extends");
-			}
-		}
-			
-		sb.append(target.getAssociations()).append(" {\n");
-		for (UmlAttributeModel value : target._attributes) {
-			sb.append("\t");
-			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ")
-					.append(value.getType()).append(" ")
-					.append(value.getName()).append(";\n");
-		}
-		sb.append("\n");
-
-		for (UmlMethodModel value : target._methods) {
-			sb.append("\t");
-			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
-			sb.append(value.getReturnType()).append(" ");
-			sb.append(value.getName()).append(" (")
-					.append(value.getParameters()).append(") {\n");
-			sb.append("\n\t}\n");
-		}
-		sb.append("}\n");
-
-		String output = sb.toString();
-		String fileName = "skelCode.java";
-
-		try {
-
-			PrintWriter outStream = new PrintWriter(fileName);
-
-			outStream.write(output);
-			outStream.close();
-		
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public AccessModifier getAccessModifier() {
 		return _accessModifier;
