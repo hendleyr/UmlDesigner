@@ -1,12 +1,8 @@
 package ui.UmlClass;
 
 import static org.jhotdraw.draw.AttributeKeys.FILL_COLOR;
-import static org.jhotdraw.draw.AttributeKeys.FONT_BOLD;
 import static org.jhotdraw.draw.AttributeKeys.STROKE_COLOR;
-import static org.jhotdraw.draw.AttributeKeys.STROKE_DASHES;
 
-import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -15,17 +11,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.Action;
-import org.jhotdraw.draw.AttributeKey;
-import org.jhotdraw.draw.AttributeKeys;
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.GraphicalCompositeFigure;
-import org.jhotdraw.draw.LineConnectionFigure;
 import org.jhotdraw.draw.ListFigure;
 import org.jhotdraw.draw.RectangleFigure;
 import org.jhotdraw.draw.TextFigure;
@@ -35,7 +27,6 @@ import org.jhotdraw.draw.event.FigureEvent;
 import org.jhotdraw.draw.layouter.VerticalLayouter;
 import org.jhotdraw.geom.Insets2D;
 import org.jhotdraw.samples.pert.figures.SeparatorLineFigure;
-import org.jhotdraw.util.ResourceBundleUtil;
 import org.jhotdraw.xml.DOMInput;
 import org.jhotdraw.xml.DOMOutput;
 
@@ -323,7 +314,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         }
     }
     
-    private HashSet<AssociationFigure> associations; // TODO: consider removing
 	private UmlClassModel model;
 	
     public UmlClassModel getModel() {
@@ -445,7 +435,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     public UmlClassFigure clone() {
     	UmlClassFigure that = (UmlClassFigure) super.clone();
     	that.setModel(new UmlClassModel());
-        that.associations = new HashSet<AssociationFigure>();
         
         List<Figure> attrFigureList = that.getAttributesCompartment().getChildren();
         for(int i = 0; i < attrFigureList.size(); ++i) {
