@@ -189,9 +189,11 @@ public class UmlClassModel {
 				sb.append("Extends ");
 				sb.append(association.getTarget().getName());
 			}
+			
 		}
 			
-		sb.append(getAssociations()).append(" {\n");
+		sb.append(getAssociations()).append(" {\n");  //deleted per Richard's suggestion
+		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
 			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ")
