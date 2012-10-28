@@ -125,17 +125,16 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				Drawing d = sharedEditor.getActiveView().getDrawing(); //get the current drawing
-				int j = d.getChildCount();
+				List<Figure> figureList = d.getFiguresFrontToBack();				
 				
 				//for every figure in the drawing
-				for(int i = 0; i < j - 1; i++){
+				for(int i = 0; i < figureList.size(); ++i){
 					//if it is a UmlClassFigure
-					if(d.contains(typeof(UmlClassFigure))){
+					if(figureList.get(i) instanceof UmlClassFigure){
 						//output code
-						String output = getModel().toString();
-						String fileName = (model.getName() + ".java");
+						String output = ((UmlClassFigure)figureList.get(i)).getModel().toString();
+						String fileName = ((UmlClassFigure)figureList.get(i)).getModel().getName() + ".java";
 
 						try {
 
