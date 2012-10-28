@@ -192,7 +192,7 @@ public class UmlClassModel {
 			
 		}
 			
-		sb.append(getAssociations()).append(" {\n");  //deleted per Richard's suggestion
+		sb.append(getAssociations()).append(" {\n"); 
 		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
