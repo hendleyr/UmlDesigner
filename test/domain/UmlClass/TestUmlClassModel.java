@@ -147,14 +147,4 @@ public class TestUmlClassModel{
 		assertTrue(!codeSkeleton.contains("["));
 		assertTrue(!codeSkeleton.contains("]"));
 	}
-	
-	@Test
-	public void testMakeCodeSkel() {
-		//test default
-		testModel.addAssociation(targetModel, AssociationType.Inheritance);
-		targetModel.addMethod(anotherMethod);
-		targetModel.addMethod(nonexistentMethod);
-		targetModel.addAttribute(testAttribute);
-		testModel.makeSkelCode(targetModel);
-	}
 }
