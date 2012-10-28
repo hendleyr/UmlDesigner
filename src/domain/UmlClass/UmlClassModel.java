@@ -192,7 +192,7 @@ public class UmlClassModel {
 			
 		}
 			
-		sb.append(getAssociations()).append(" {\n"); 
+		sb.append(" {\n"); 
 		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
@@ -206,9 +206,19 @@ public class UmlClassModel {
 			sb.append("\t");
 			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
 			sb.append(value.getReturnType()).append(" ");
-			sb.append(value.getName()).append(" (")
-					.append(value.getParameters()).append(") {\n");
-			sb.append("\n\t}\n");
+			sb.append(value.getName()).append(" (");
+			for(int i = 0; i < value.getParameters().size(); ++ i) { 
+				if(i == value.getParameters().size() -1) {
+					sb.append(value.getParameters().get(i).getType() + " " + 
+				value.getParameters().get(i).getName());
+				}
+				else {
+					sb.append(value.getParameters().get(i).getType() + " " +
+				value.getParameters().get(i).getName() + ", ");
+				}
+			}
+			sb.append(") {"); 
+			sb.append("\n\n\t}\n");
 		}
 		sb.append("}\n");
 
