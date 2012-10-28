@@ -5,7 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.jhotdraw.draw.DefaultDrawingEditor;
 import org.jhotdraw.draw.Drawing;
 import org.jhotdraw.draw.DrawingEditor;
 import org.jhotdraw.draw.DrawingView;
+import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.TextAreaFigure;
 import org.jhotdraw.draw.action.ButtonFactory;
 import org.jhotdraw.draw.io.DOMStorableInputOutputFormat;
@@ -87,7 +90,8 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		ActionMap m = super.createActionMap(a, v);
 		ResourceBundleUtil drawLabels = ResourceBundleUtil
 				.getBundle("org.jhotdraw.draw.Labels");
-		ResourceBundleUtil ourLabels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
+		ResourceBundleUtil ourLabels = ResourceBundleUtil
+				.getBundle("ui.UmlClass.Labels");
 		AbstractAction aa;
 		m.put(ExportFileAction.ID, new ExportFileAction(a, v));
 		m.put("view.toggleGrid", aa = new ToggleViewPropertyAction(a, v,
@@ -99,41 +103,58 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 							sf)));
 			aa.putValue(Action.NAME, (int) (sf * 100) + " %");
 		}
-		
+
 		m.put("edit.observerPattern", aa = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// 
-				DOMStorableInputOutputFormat dom = 
-						new DOMStorableInputOutputFormat(new UmlDesignerFactory());
+				//
+				DOMStorableInputOutputFormat dom = new DOMStorableInputOutputFormat(
+						new UmlDesignerFactory());
 				try {
-					dom.read(new File("observerPattern.xml"), sharedEditor.getActiveView().getDrawing(), false);
+					dom.read(new File("observerPattern.xml"), sharedEditor
+							.getActiveView().getDrawing(), false);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}				
-			}});
+				}
+			}
+		});
 		ourLabels.configureAction(aa, "edit.observerPattern");
-		
+
 		m.put("edit.generateSkeletonCodeFile", aa = new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				DOMStorableInputOutputFormat dom = 
-						new DOMStorableInputOutputFormat(new UmlDesignerFactory());
-				try {
-					dom.write(new File("generateSkeletonCodeFile.java"), sharedEditor.getActiveView().getDrawing());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				Drawing d = sharedEditor.getActiveView().getDrawing(); //get the current drawing
+				int j = d.getChildCount();
 				
+				//for every figure in the drawing
+				for(int i = 0; i < j - 1; i++){
+					//if it is a UmlClassFigure
+					if(d.contains(typeof(UmlClassFigure))){
+						//output code
+						String output = getModel().toString();
+						String fileName = (model.getName() + ".java");
+
+						try {
+
+							PrintWriter outStream = new PrintWriter(fileName);
+
+							outStream.write(output);
+							outStream.close();
+						
+						} catch (FileNotFoundException e1) {
+							e1.printStackTrace();
+						}
+					}
+				}
+
 			}
-			
+
 		});
 		ourLabels.configureAction(aa, "edit.generateSkeletonCodeFile");
-		
+
 		return m;
 	}
 
@@ -193,25 +214,27 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		tb.addSeparator();
 		ButtonFactory.addToolTo(tb, editor, new TextAreaCreationTool(
 				new TextAreaFigure()), "edit.createTextArea", drawLabels);
-		
-		//ButtonFactory.addToolTo(tb, editor, new CreationTool(), "edit.observerPattern", drawLabels)
+
+		// ButtonFactory.addToolTo(tb, editor, new CreationTool(),
+		// "edit.observerPattern", drawLabels)
 	}
 
 	@Override
 	protected MenuBuilder createMenuBuilder() {
 		return new DefaultMenuBuilder() {
-			
-		    @Override
-		    public void addOtherEditItems(JMenu m, Application app, @Nullable View v) {
-		    	ActionMap am = app.getActionMap(v);
-		    	JMenuItem item = new JMenuItem(am.get("edit.observerPattern"));
-		    	item.setAction(am.get("edit.observerPattern"));
-		    	JMenuItem anotherItem = new JMenuItem(am.get("edit.generateSkeletonCodeFile"));
-		    	anotherItem.setAction(am.get("edit.generateSkeletonCodeFile"));
-		    	m.add(item);
-		    	m.add(anotherItem);
-		    }
-		    
+
+			@Override
+			public void addOtherEditItems(JMenu m, Application app,
+					@Nullable View v) {
+				ActionMap am = app.getActionMap(v);
+				JMenuItem item = new JMenuItem(am.get("edit.observerPattern"));
+				item.setAction(am.get("edit.observerPattern"));
+				JMenuItem anotherItem = new JMenuItem(
+						am.get("edit.generateSkeletonCodeFile"));
+				anotherItem.setAction(am.get("edit.generateSkeletonCodeFile"));
+				m.add(item);
+				m.add(anotherItem);
+			}
 
 			@Override
 			public void addOtherViewItems(JMenu m, Application app,
@@ -241,15 +264,4 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		return sharedEditor;
 	}
 
-	public void exportCodeSkeletons(Drawing d ) {
-				
-		//getFiguresFrontToBack();
-//		LinkedList<Figure> iterator = d.iterator();
-//		
-//		//for every class figure in drawing d do
-//		while(iterator.isEmpty()==false) {
-//			String output = d.getModel().toString();
-// 
-//		}
-    }
 }

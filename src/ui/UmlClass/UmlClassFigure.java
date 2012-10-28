@@ -686,7 +686,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 				//willChange();
 				
 				String output = getModel().toString();
-				
 				String fileName = (model.getName() + ".java");
 
 				try {
