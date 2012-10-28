@@ -131,6 +131,22 @@ public class TestUmlClassModel{
 		//remove an attribute that doesn't exist (throws exception)
 		assertFalse(testModel.removeMethod(nonexistentMethod));
 	}
+
+	@Test
+	public void testToString() {
+		// quick and dirty test to verify that mysterious [] characters are no longer displayed
+		testModel.addAssociation(targetModel, AssociationType.Inheritance);
+		UmlAttributeModel paramA = new UmlAttributeModel();
+		UmlAttributeModel paramB = new UmlAttributeModel();
+		ArrayList<UmlAttributeModel> params = new ArrayList<UmlAttributeModel>();
+		params.add(paramA);
+		params.add(paramB);		
+		testModel.addMethod(new UmlMethodModel(AccessModifier.Public, "Object", "TestMethod", params));
+		testModel.addAttribute(new UmlAttributeModel());
+		String codeSkeleton = testModel.toString();
+		assertTrue(!codeSkeleton.contains("["));
+		assertTrue(!codeSkeleton.contains("]"));
+	}
 	
 	@Test
 	public void testMakeCodeSkel() {
