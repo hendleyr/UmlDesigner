@@ -115,6 +115,25 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 			}});
 		ourLabels.configureAction(aa, "edit.observerPattern");
 		
+		m.put("edit.generateSkeletonCodeFile", aa = new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				DOMStorableInputOutputFormat dom = 
+						new DOMStorableInputOutputFormat(new UmlDesignerFactory());
+				try {
+					dom.write(new File("generateSkeletonCodeFile.java"), sharedEditor.getActiveView().getDrawing());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+			
+		});
+		ourLabels.configureAction(aa, "edit.generateSkeletonCodeFile");
+		
 		return m;
 	}
 
@@ -187,8 +206,13 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		    	ActionMap am = app.getActionMap(v);
 		    	JMenuItem item = new JMenuItem(am.get("edit.observerPattern"));
 		    	item.setAction(am.get("edit.observerPattern"));
+		    	JMenuItem anotherItem = new JMenuItem(am.get("edit.generateSkeletonCodeFile"));
+		    	anotherItem.setAction(am.get("edit.generateSkeletonCodeFile"));
 		    	m.add(item);
+		    	m.add(anotherItem);
 		    }
+		    
+
 			@Override
 			public void addOtherViewItems(JMenu m, Application app,
 					@Nullable View v) {
