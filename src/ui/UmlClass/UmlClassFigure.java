@@ -218,7 +218,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         		}
         		else {
         			String typeSubstring = afterParen.substring(afterParen.indexOf(':'));
-        			System.out.println("DEBUG: typeSubstring = " + typeSubstring);
         			
         			Matcher m = p.matcher(typeSubstring);
         			m.find();
