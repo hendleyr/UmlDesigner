@@ -422,8 +422,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     private void drawMethod(UmlMethodModel methodModel) {
     	String text = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
     	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
-    		if ( i == methodModel.getParameters().size() - 1) text += methodModel.getParameters().get(i).getType() + " " + methodModel.getParameters().get(i).getName();
-    		else text += methodModel.getParameters().get(i).getType() + " " + methodModel.getParameters().get(i).getName() + ", ";
+    		if ( i == methodModel.getParameters().size() - 1) text+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
+    		else text+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
     	}
     	text += ") : " + methodModel.getReturnType();
     	TextFigure methodFigure = new TextFigure(text);
@@ -626,14 +626,16 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 		        	
 		        	in.openElement("params");
 		        	List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
-			        	for (int j = 0; j < in.getElementCount("param"); ++j) {		        		
-			        		in.openElement("paramType");
-			        			String paramType = in.getText();
-			        		in.closeElement();
-			        		
-			        		in.openElement("paramName");
-			        			String paramName = in.getText();
-			        		in.closeElement();
+			        	for (int j = 0; j < in.getElementCount("param"); ++j) {
+			        		in.openElement("param");
+				        		in.openElement("paramType");
+				        			String paramType = in.getText();
+				        		in.closeElement();
+				        		
+				        		in.openElement("paramName");
+				        			String paramName = in.getText();
+				        		in.closeElement();
+				        	in.closeElement();
 			        		methodParams.add(new UmlAttributeModel(null, paramName, paramType));
 			        	}
 		        	in.closeElement();
