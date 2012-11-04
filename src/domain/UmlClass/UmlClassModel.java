@@ -1,7 +1,5 @@
 package domain.UmlClass;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
