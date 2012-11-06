@@ -34,6 +34,7 @@ public class UmlDesignerFactory extends DefaultDOMFactory {
         { LocatorConnector.class, "locConnector" },
         { RelativeLocator.class, "relativeLocator" },
         { ArrowTip.class, "arrowTip" }
+        // TODO: add the new ui items to the factory
 	};
 	
 	private final static Object[][] enumTagArray = {

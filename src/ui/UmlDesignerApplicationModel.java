@@ -56,27 +56,8 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 	private final static double[] scaleFactors = { 5, 4, 3, 2, 1.5, 1.25, 1,
 			0.75, 0.5, 0.25, 0.10 };
 	private DefaultDrawingEditor sharedEditor;
-	private HashMap<String, Action> actions;
 
-	private static class ToolButtonListener implements ItemListener {
-		private Tool tool;
-		private DrawingEditor editor;
-
-		public ToolButtonListener(Tool t, DrawingEditor editor) {
-			this.tool = t;
-			this.editor = editor;
-		}
-
-		@Override
-		public void itemStateChanged(ItemEvent evt) {
-			if (evt.getStateChange() == ItemEvent.SELECTED) {
-				editor.setTool(tool);
-			}
-		}
-	}
-
-	public UmlDesignerApplicationModel() {
-	}
+	public UmlDesignerApplicationModel() {}
 
 	@Override
 	public void initView(Application a, @Nullable View v) {
@@ -111,10 +92,8 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 				DOMStorableInputOutputFormat dom = new DOMStorableInputOutputFormat(
 						new UmlDesignerFactory());
 				try {
-					dom.read(new File("observerPattern.xml"), sharedEditor
-							.getActiveView().getDrawing(), false);
+					dom.read(new File("observerPattern.xml"), sharedEditor.getActiveView().getDrawing(), false);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -213,9 +192,6 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 		tb.addSeparator();
 		ButtonFactory.addToolTo(tb, editor, new TextAreaCreationTool(
 				new TextAreaFigure()), "edit.createTextArea", drawLabels);
-
-		// ButtonFactory.addToolTo(tb, editor, new CreationTool(),
-		// "edit.observerPattern", drawLabels)
 	}
 
 	@Override
