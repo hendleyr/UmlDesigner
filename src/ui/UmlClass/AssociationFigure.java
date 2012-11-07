@@ -157,6 +157,7 @@ public class AssociationFigure extends LineConnectionFigure {
 				willChange();
 				// change end decoration to no arrow
 				set(END_DECORATION, null);
+				set(START_DECORATION, null);
 				associationModel.setType(AssociationType.Association);
 	        	changed();
 			}
