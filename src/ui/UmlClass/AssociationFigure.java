@@ -2,6 +2,10 @@ package ui.UmlClass;
 
 import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+import org.jhotdraw.draw.layouter.HorizontalLayouter;
+import org.jhotdraw.draw.layouter.LocatorLayouter;
+import org.jhotdraw.draw.liner.ElbowLiner;
+import org.jhotdraw.draw.locator.BezierLabelLocator;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,7 +23,20 @@ import domain.UmlClass.AssociationType;
 import domain.UmlClass.UmlAssociationModel;
 
 @SuppressWarnings("serial")
-public class AssociationFigure extends LineConnectionFigure {
+public class AssociationFigure extends LabeledLineConnectionFigure {
+	private static final double[] DASH_PATTERN = new double[] {10};
+	
+	// layout thoughts: multiplicities above the line near the arrow, roles below the line near the arrow,
+	//					relationship above the line centered horizontally
+	
+	private TextFigure startMultiplicity;
+	private TextFigure endMultiplicity;
+	
+	private TextFigure relationship;
+	
+	private TextFigure startRole;
+	private TextFigure endRole;
+	
 	private UmlAssociationModel associationModel;
 	private UmlClassFigure startFigure;
 	private UmlClassFigure endFigure;
@@ -29,18 +46,38 @@ public class AssociationFigure extends LineConnectionFigure {
     public AssociationFigure() {
     	associationModel = new UmlAssociationModel(null, null);
     	isBidirectional = false;
+    	setLiner(new ElbowLiner());
     	
         set(STROKE_COLOR, new Color(0x000099));
         set(AttributeKeys.FILL_COLOR, Color.WHITE);
         set(STROKE_WIDTH, 1d);
+        set(STROKE_DASHES, DASH_PATTERN);
         set(END_DECORATION, new ArrowTip());
-
+        
         setAttributeEnabled(FILL_COLOR, true);
         setAttributeEnabled(END_DECORATION, true);
         setAttributeEnabled(START_DECORATION, true);
-        setAttributeEnabled(STROKE_DASHES, false);
-        setAttributeEnabled(FONT_ITALIC, false);
-        setAttributeEnabled(FONT_UNDERLINE, false);
+        setAttributeEnabled(STROKE_DASHES, true);
+        
+        startMultiplicity = new TextFigure("start mult");
+        startRole = new TextFigure("start role");
+        endMultiplicity = new TextFigure("end mult");
+        endRole = new TextFigure("end role");
+        relationship = new TextFigure("relationship");
+        // TODO: these layouts are ALL messed up; but it's a start/proof of concept i guess
+        // maybe we want to try a DIFFERENT layouter
+        setLayouter(new LocatorLayouter());
+        startMultiplicity.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, Math.PI / 4, 2));
+        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, -Math.PI / 4, 2));
+        endMultiplicity.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, Math.PI / 4, 2));
+        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, -Math.PI / 4, 2));
+        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.5, -Math.PI / 4, 0));
+        
+        add(startMultiplicity);
+        add(startRole);
+        add(endMultiplicity);
+        add(endRole);
+        add(relationship);        
     }
 
     /**
@@ -119,8 +156,11 @@ public class AssociationFigure extends LineConnectionFigure {
 			public void actionPerformed(ActionEvent e) {
 				willChange();
 				// change end decoration to white diamond
+				set(STROKE_DASHES, null);
 				set(END_DECORATION, new ArrowTip(1, 20.0 , 20.0, false, true, true));
 				associationModel.setType(AssociationType.Aggregation);
+				
+				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
 		        changed();
 			}
     	});
@@ -130,6 +170,7 @@ public class AssociationFigure extends LineConnectionFigure {
 				if(!startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) {
 					willChange();
 					// change end decoration to white arrow
+					set(STROKE_DASHES, null);
 					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, false, true, true));
 					associationModel.setType(AssociationType.Inheritance);
 					
@@ -146,8 +187,11 @@ public class AssociationFigure extends LineConnectionFigure {
 			public void actionPerformed(ActionEvent e) {
 				willChange();
 				// change end decoration to default small arrow
+				set(STROKE_DASHES, DASH_PATTERN);
 				set(END_DECORATION, new ArrowTip());
 				associationModel.setType(AssociationType.Dependency);
+				
+				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
 	        	changed();
 			}
     	});
@@ -156,6 +200,7 @@ public class AssociationFigure extends LineConnectionFigure {
 			public void actionPerformed(ActionEvent e) {
 				willChange();
 				// change end decoration to no arrow
+				set(STROKE_DASHES, null);
 				set(END_DECORATION, null);
 				set(START_DECORATION, null);
 				associationModel.setType(AssociationType.Association);

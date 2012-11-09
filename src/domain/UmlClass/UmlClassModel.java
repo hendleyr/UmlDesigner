@@ -9,6 +9,8 @@ public class UmlClassModel {
 	private List<UmlAssociationModel> _associations;
 	private List<UmlAttributeModel> _attributes;
 	private List<UmlMethodModel> _methods;
+	private boolean _isAbstract; 	// TODO: modify toString
+	private boolean _isInterface; 	// TODO: modify toString
 
 	public UmlClassModel() {
 		this(AccessModifier.Public, "newClass");
@@ -140,17 +142,15 @@ public class UmlClassModel {
 		for (UmlMethodModel methodModel : _methods) {
 			if (methodModel.getName().equals(method.getName())) {
 				return false;
-				// throw new Exception ("Duplicate method found.");
 			}
 		}
 
-		// ad new UmlMethodModel
+		// add new UmlMethodModel
 		_methods.add(method);
 		return true;
 	}
 
 	public boolean removeMethod(UmlMethodModel method) {
-		// throw exception if cannot find method to remove
 		boolean methodFound = false;
 		for (UmlMethodModel methodModel : _methods) {
 			if (methodModel.getName().equals(method.getName())) {
@@ -161,7 +161,6 @@ public class UmlClassModel {
 
 		if (!methodFound) {
 			return false;
-			// throw new Exception ("Method not found.");
 		}
 
 		// remove UmlMethodModel
@@ -263,5 +262,21 @@ public class UmlClassModel {
 
 	public void setMethods(List<UmlMethodModel> methods) {
 		this._methods = methods;
+	}
+
+	public boolean getAbstractFlag() {
+		return _isAbstract;
+	}
+
+	public void setAbstractFlag(boolean isAbstract) {
+		this._isAbstract = isAbstract;
+	}
+
+	public boolean getInterfaceFlag() {
+		return _isInterface;
+	}
+
+	public void setInterfaceFlag(boolean isInterface) {
+		this._isInterface = isInterface;
 	}
 }

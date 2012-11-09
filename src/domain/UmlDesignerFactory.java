@@ -13,6 +13,9 @@ import org.jhotdraw.draw.locator.RelativeLocator;
 import org.jhotdraw.xml.DefaultDOMFactory;
 
 import ui.UmlClass.AssociationFigure;
+import ui.UmlClass.AttributeFigure;
+import ui.UmlClass.ClassNameFigure;
+import ui.UmlClass.MethodFigure;
 import ui.UmlClass.SeparatorFigure;
 import ui.UmlClass.UmlClassFigure;
 import domain.UmlClass.AccessModifier;
@@ -29,12 +32,15 @@ public class UmlDesignerFactory extends DefaultDOMFactory {
         { TextAreaFigure.class, "ta" },
         { SeparatorFigure.class, "separator" },
         
+        { ClassNameFigure.class, "classNameFigure" },
+        { AttributeFigure.class, "attributeFigure" },
+        { MethodFigure.class, "methodFigure" },
+        
         { AssociationFigure.class, "association" },
         { ChopRectangleConnector.class, "rectConnector" },
         { LocatorConnector.class, "locConnector" },
         { RelativeLocator.class, "relativeLocator" },
         { ArrowTip.class, "arrowTip" }
-        // TODO: add the new ui items to the factory
 	};
 	
 	private final static Object[][] enumTagArray = {

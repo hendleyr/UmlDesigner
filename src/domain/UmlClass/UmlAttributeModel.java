@@ -4,6 +4,7 @@ public class UmlAttributeModel {
 	private AccessModifier _accessModifier;
 	private String _name;
 	private String _type;
+	private boolean _isStatic;
 	
 	public UmlAttributeModel() {
 		this(AccessModifier.Private, "newAttribute", "Object");
@@ -32,5 +33,13 @@ public class UmlAttributeModel {
 	}
 	public void setAccessModifier(AccessModifier accessModifier) {
 		this._accessModifier = accessModifier;
+	}
+
+	public boolean getStaticFlag() {
+		return _isStatic;
+	}
+
+	public void setStaticFlag(boolean _isStatic) {
+		this._isStatic = _isStatic;
 	}
 }

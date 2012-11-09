@@ -3,6 +3,7 @@ package domain.UmlClass;
 public enum AccessModifier {
 	
 	// our access modifiers
+	Default('~'),
 	Public('+'),
 	Private('-'),
 	Protected('#');

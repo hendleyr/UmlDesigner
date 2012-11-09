@@ -217,8 +217,7 @@ public class UmlDesignerApplicationModel extends DefaultApplicationModel {
 				ActionMap am = app.getActionMap(v);
 				JCheckBoxMenuItem cbmi;
 				cbmi = new JCheckBoxMenuItem(am.get("view.toggleGrid"));
-				ActionUtil.configureJCheckBoxMenuItem(cbmi,
-						am.get("view.toggleGrid"));
+				ActionUtil.configureJCheckBoxMenuItem(cbmi, am.get("view.toggleGrid"));
 				m.add(cbmi);
 				JMenu m2 = new JMenu("Zoom");
 				for (double sf : scaleFactors) {

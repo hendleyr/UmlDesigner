@@ -8,6 +8,8 @@ public class UmlMethodModel {
 	private String _returnType;
 	private String _name;
 	private List<UmlAttributeModel> _parameters;
+	private boolean isStatic;
+	private boolean isAbstract;
 	
 	public UmlMethodModel() {
 		this(AccessModifier.Public, "Object", "newMethod", new ArrayList<UmlAttributeModel>());
@@ -51,5 +53,21 @@ public class UmlMethodModel {
 	
 	public void setParameters(List<UmlAttributeModel> parameters) {
 		this._parameters = parameters;
+	}
+
+	public boolean getStaticFlag() {
+		return isStatic;
+	}
+
+	public void setStaticFlag(boolean isStatic) {
+		this.isStatic = isStatic;
+	}
+
+	public boolean getAbstractFlag() {
+		return isAbstract;
+	}
+
+	public void setAbstractFlag(boolean isAbstract) {
+		this.isAbstract = isAbstract;
 	}
 }

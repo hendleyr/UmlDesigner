@@ -12,18 +12,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.Action;
+
+import org.jhotdraw.draw.AttributeKeys;
 import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.GraphicalCompositeFigure;
 import org.jhotdraw.draw.ListFigure;
 import org.jhotdraw.draw.RectangleFigure;
 import org.jhotdraw.draw.TextFigure;
 import javax.swing.AbstractAction;
-import org.jhotdraw.draw.event.FigureAdapter;
-import org.jhotdraw.draw.event.FigureEvent;
 import org.jhotdraw.draw.layouter.VerticalLayouter;
 import org.jhotdraw.geom.Insets2D;
 import org.jhotdraw.samples.pert.figures.SeparatorLineFigure;
@@ -38,283 +36,8 @@ import domain.UmlClass.UmlClassModel;
 import domain.UmlClass.UmlMethodModel;
 
 @SuppressWarnings("serial")
-public class UmlClassFigure extends GraphicalCompositeFigure {
-	private int uniqAttrId = 1;
-	private int uniqMethodId = 1;
-	
-    private static class ClassNameAdapter extends FigureAdapter {
-        private UmlClassFigure target;
-
-        public ClassNameAdapter(UmlClassFigure target) {
-            this.target = target;
-        }
-        
-        @Override
-        public void figureChanged(FigureEvent e) {
-        	// VERIFY AND MAP USER INPUT TO MODEL
-        	target.willChange();
-        	TextFigure nameFigure = target.getNameFigure();        	        	
-        	String text = nameFigure.getText();
-        	
-        	AccessModifier modelAccessModifier;
-        	if (text.startsWith("+")) {
-        		modelAccessModifier = AccessModifier.Public;
-        	}
-        	else if (text.startsWith("-")) {
-        		modelAccessModifier = AccessModifier.Private;
-        	}
-        	else if (text.startsWith("#")) {
-        		modelAccessModifier = AccessModifier.Protected;
-        	}
-        	else modelAccessModifier = AccessModifier.Public;
-        	target.getModel().setAccessModifier(modelAccessModifier);
-        	
-        	Pattern p = Pattern.compile("([\\w]+\\.)*[\\w]+");
-        	Matcher m = p.matcher(text);
-        	m.find();      	
-        	
-        	if (m.group().length() > 0) target.getModel().setName(m.group());
-        	else target.getModel().setName("newClass");
-        	target.drawClass();
-        	target.changed();
-        }
-    }
-
-    private static class AttributeAdapter extends FigureAdapter {
-        private UmlClassFigure target;
-
-        public AttributeAdapter(UmlClassFigure target) {
-            this.target = target;
-        }//TODO: split out these huge blocks
-        
-        @Override
-        public void figureChanged(FigureEvent e) {        	
-        	// VERIFY AND MAP USER INPUT TO MODELS
-        	// new strat: reinitialize the model's attr list; examine all text figures in  
-        	// the compartment, map them into attrModels, then re-add them to the classModel
-        	// if user entered bad data, we assign default values w/ uniqAttrId
-        	target.willChange();
-        	target.getAttributesCompartment().willChange();
-        	List<Figure> attrFigures = target.getAttributesCompartment().getChildren();
-        	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
-        	
-        	// reinit class model's attrList
-        	target.getModel().setAttributes(new ArrayList<UmlAttributeModel>());
-        	for(Figure attrFigure : attrFigures) {
-        		String attrText = ((TextFigure)attrFigure).getText();
-        		
-            	// assess <accessmod>
-            	AccessModifier attrAccessModifier;
-            	if (attrText.startsWith("+")) {
-            		attrAccessModifier = AccessModifier.Public;
-            	}
-            	else if (attrText.startsWith("-")) {
-            		attrAccessModifier = AccessModifier.Private;
-            	}
-            	else if (attrText.startsWith("#")) {
-            		attrAccessModifier = AccessModifier.Protected;
-            	}
-            	else attrAccessModifier = AccessModifier.Private;
-        		
-        		// assess <name> : <type>
-        		String attrType;
-        		String attrName;
-            	if (attrText.indexOf(':') == -1) {
-            		attrType = "Object";
-            		
-            		Matcher m = p.matcher(attrText.substring(0));
-            		m.find();
-            		attrName = m.group();
-            	}
-            	else {
-            		//TODO: use fully qualified java identifier pattern
-                	Matcher m = p.matcher(attrText.substring(attrText.indexOf(':')));
-                	m.find();
-                	attrType = m.group();
-            		
-                	m = p.matcher(attrText.substring(0, attrText.indexOf(':')));
-                	m.find();
-                	attrName = m.group();
-            	}
-            	
-            	UmlAttributeModel remappedAttr = new UmlAttributeModel(attrAccessModifier, attrName, attrType);
-            	try {
-            		target.getModel().addAttribute(remappedAttr);
-            	} catch (Exception mapException) {
-            		// something failed, supply defaults for user revision
-            		remappedAttr = new UmlAttributeModel
-            				(AccessModifier.Private, "newAttribute" + target.uniqAttrId, "Object");
-            	}
-            	attrFigure.willChange();
-            	((TextFigure)attrFigure).setText
-            		(attrAccessModifier.getSymbol() + " " + remappedAttr.getName() + " : " + remappedAttr.getType());
-            	attrFigure.changed();
-        	}
-        	target.getAttributesCompartment().changed();
-        	target.changed();
-    	}
-    }
-    
-    private static class MethodAdapter extends FigureAdapter {
-        private UmlClassFigure target;
-
-        public MethodAdapter(UmlClassFigure target) {
-            this.target = target;
-        }
-
-        @Override
-        public void figureChanged(FigureEvent evt) {
-        	// VERIFY AND MAP USER INPUT TO MODELS
-        	// new strat: reinitialize the model's method list; examine all text figures in  
-        	// the compartment, map them into methodModels, then re-add them to the classModel
-        	// if user entered bad data, we assign default values w/ uniqMethodId
-        	target.willChange();
-        	target.getMethodsCompartment().willChange();
-        	List<Figure> methodFigures = target.getMethodsCompartment().getChildren();
-        	Pattern p = Pattern.compile("([\\w]+)");	// regex for words
-        	
-        	// reinit class model's methodList
-        	target.getModel().setMethods(new ArrayList<UmlMethodModel>());
-        	for(Figure methodFigure : methodFigures) {
-        		String methodText = ((TextFigure)methodFigure).getText();
-        		
-            	// assess <accessmod>
-            	AccessModifier methodAccessModifier;
-            	if (methodText.startsWith("+")) {
-            		methodAccessModifier = AccessModifier.Public;
-            	}
-            	else if (methodText.startsWith("-")) {
-            		methodAccessModifier = AccessModifier.Private;
-            	}
-            	else if (methodText.startsWith("#")) {
-            		methodAccessModifier = AccessModifier.Protected;
-            	}
-            	else methodAccessModifier = AccessModifier.Private;
-        		
-        	// assess <name>(<param>:<paramType>) : <type>
-        	String methodType;
-        	String methodName;
-
-        	ArrayList<UmlAttributeModel> params = new ArrayList<UmlAttributeModel>();
-        		
-        	//if user input does not have a valid set of open and close parentheses or has no colons,
-        	//assign default values
-        	if (methodText.indexOf('(') == -1 || methodText.indexOf(')') == -1 || 
-        			methodText.indexOf(':') == -1 || methodText.indexOf(')') < methodText.indexOf('(')) {
-        		methodType = "Object";
-        		
-        		Matcher m = p.matcher(methodText.substring(0));
-        		m.find();
-        		methodName = m.group();
-        	}
-        	else {
-        		String nameSubstring = methodText.substring(0, methodText.indexOf('('));
-        		String paramSubstring = methodText.substring(methodText.indexOf('(') + 1,
-        						methodText.indexOf(')'));
-        		String afterParen = methodText.substring(methodText.indexOf(')'));
-        		
-        		if (afterParen.indexOf(':') == -1){
-        			methodType = "Object";	
-        		}
-        		else {
-        			String typeSubstring = afterParen.substring(afterParen.indexOf(':'));
-        			
-        			Matcher m = p.matcher(typeSubstring);
-        			m.find();
-        			methodType = m.group();
-        		}
-
-        		Matcher m = p.matcher(nameSubstring);
-        		m.find();
-        		methodName = m.group();
-        			
-        		int commaIndex = paramSubstring.indexOf(',');
-        		String paramName;
-        		String paramType;
-        		
-        		if (paramSubstring.equals("")){
-        		}
-        		
-        		//case for only 1 param; the rest of this could probably be more elegant but
-        		//this should do for our purposes.
-        		else if (commaIndex == -1){
-        			if (paramSubstring.indexOf(':') == -1){
-        				
-        				m = p.matcher(paramSubstring);
-        				m.find();
-        				paramName = m.group();
-        				
-        				paramType = "Object";
-        			}
-        			else {
-        				m = p.matcher(paramSubstring.substring(0, paramSubstring.indexOf(':')));
-        				m.find();
-        				paramName = m.group();
-        				
-        				m = p.matcher(paramSubstring.substring(paramSubstring.indexOf(':')));
-        				m.find();
-        				paramType = m.group();
-        			}
-    				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
-        		}
-        		//case for multiple parameters
-        		else {
-        			String[] paramStrings = paramSubstring.split(",");
-        			for (String param : paramStrings){
-        				if (param.indexOf(':') == -1){
-        					m = p.matcher(param);
-        					m.find();
-        					paramName = m.group();
-        					paramType = "Object";
-        				}
-        				else {
-        					m = p.matcher(param.substring(0, param.indexOf(':')));
-        					m.find();
-        					paramName = m.group();
-        					
-        					m = p.matcher(param.substring(param.indexOf(':')));
-        					m.find();
-        					paramType = m.group();
-        				}
-        				params.add(new UmlAttributeModel(AccessModifier.Private, paramName, paramType));
-        			}
-        		}        			
-        	}
-        		
-            	
-           	UmlMethodModel remappedMethod = new UmlMethodModel(methodAccessModifier, methodType, methodName, params);
-            	try {
-            		target.getModel().addMethod(remappedMethod);
-            	} catch (Exception mapException) {
-            		// something failed, supply defaults for user revision
-            		remappedMethod = new UmlMethodModel
-            				(AccessModifier.Public, "Object", "newMethod" + target.uniqMethodId, new ArrayList<UmlAttributeModel>());
-            		target.getModel().addMethod(remappedMethod);
-            		++target.uniqMethodId;
-            	}
-            	String paramString = "";
-            	if (params.size() == 1){
-            		paramString = params.get(0).getName() + " : " + params.get(0).getType();
-            	}
-            	else if (params.size() > 1){
-            		for (int i = 0; i < params.size() - 1; i++){
-            			paramString += params.get(i).getName() + " : " + params.get(i).getType() + ", ";
-            		}
-            		paramString += params.get(params.size() - 1).getName() + " : " + params.get(params.size() - 1).getType();
-            	}
-            	methodFigure.willChange();
-            	((TextFigure)methodFigure).setText
-            		(methodAccessModifier.getSymbol() + " " + remappedMethod.getName() + "(" + paramString +
-            									")" + " : " + remappedMethod.getReturnType());
-            	methodFigure.changed();
-        	}
-        	target.getMethodsCompartment().changed();
-        	target.changed();
-        }
-    }
-    
-	private UmlClassModel model;
-	
+public class UmlClassFigure extends GraphicalCompositeFigure {    
+	private UmlClassModel model;	
     public UmlClassModel getModel() {
         return model;
     }
@@ -354,34 +77,32 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         attributesCompartment.set(LAYOUT_INSETS, insets);
         methodsCompartment.set(LAYOUT_INSETS, insets);
 
-        TextFigure nameFigure = new TextFigure("+ newClass");
-        nameCompartment.add(nameFigure);
-        //nameFigure.addFigureListener(new ClassNameAdapter(this));
+        // supply a default class name
+        ClassNameFigure classNameFigure = new ClassNameFigure("+ newClass", model);
+        nameCompartment.add(classNameFigure);
         
-        String attrName = "newAttribute";
-        String attrType = "Object";
-        AccessModifier attrAccessMod = AccessModifier.Private;
-        TextFigure attrFigure = new TextFigure(attrAccessMod.getSymbol() + " " + attrName + " : " + attrType);
-        getModel().addAttribute(new UmlAttributeModel(attrAccessMod, attrName, attrType));        
-        attributesCompartment.add(attrFigure);
-        //attrFigure.addFigureListener(new AttributeAdapter(this));
+        // supply a default attr
+//        String attrName = "newAttribute";
+//        String attrType = "Object";
+//        AccessModifier attrAccessMod = AccessModifier.Private;
+//        UmlAttributeModel attrModel = new UmlAttributeModel(attrAccessMod, attrName, attrType);
+//        AttributeFigure attrFigure = new AttributeFigure(attrAccessMod.getSymbol() + " " + attrName + " : " + attrType, model, attrModel);
+//        attributesCompartment.add(attrFigure);
         
-        AccessModifier methodAccessMod = AccessModifier.Public;
-        String methodName = "newMethod";
-        String methodType = "Object";
-        List<UmlMethodModel> methodList = new ArrayList<UmlMethodModel>();
-        List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
-        methodList.add(new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams));
-        getModel().setMethods(methodList);
-        methodsCompartment.add(new TextFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")" + " : " + methodType));
-        
-        //ResourceBundleUtil labels = ResourceBundleUtil.getBundle("ui.UmlClass.Labels");
+        // supply a default method
+//        AccessModifier methodAccessMod = AccessModifier.Public;
+//        String methodName = "newMethod";
+//        String methodType = "Object";
+//        List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
+//        UmlMethodModel methodModel = new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams);
+//        MethodFigure methodFigure = new MethodFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")" + " : " + methodType, model, methodModel);
+//        methodsCompartment.add(methodFigure);
     }
     
-    protected TextFigure getNameFigure() {
+    protected ClassNameFigure getNameFigure() {
     	ListFigure nameCompartment = (ListFigure) this.getChild(0);
-    	TextFigure nameFigure = (TextFigure) nameCompartment.getChild(0);
-    	return nameFigure;
+    	ClassNameFigure classNameFigure = (ClassNameFigure) nameCompartment.getChild(0);
+    	return classNameFigure;
     }
     protected ListFigure getAttributesCompartment() {
     	ListFigure attributesCompartment = (ListFigure) this.getChild(2);
@@ -393,6 +114,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     	return methodsCompartment;
     }
 
+    //TODO: possibly remove these helpers
 	/**
 	 * @precondition	nameFigureCompartment has been initialized
 	 * @postcondition	nameFigure has been updated with info from model
@@ -409,9 +131,9 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	 * @param 			attrModel	model info to display
 	 */
     private void drawAttribute(UmlAttributeModel attrModel) {
-    	TextFigure attrFigure = new TextFigure(attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType());
+    	String attrFigureText = attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType();
+    	AttributeFigure attrFigure = new AttributeFigure(attrFigureText, model, attrModel);
     	getAttributesCompartment().add(attrFigure);
-    	attrFigure.addFigureListener(new AttributeAdapter(this));
     }
     
     /**
@@ -420,38 +142,37 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	 * @param 			methodModel	model info to display
 	 */
     private void drawMethod(UmlMethodModel methodModel) {
-    	String text = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
+    	String methodFigureText = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
     	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
-    		if ( i == methodModel.getParameters().size() - 1) text+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
-    		else text+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
+    		if ( i == methodModel.getParameters().size() - 1)
+    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
+    		else
+    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
     	}
-    	text += ") : " + methodModel.getReturnType();
-    	TextFigure methodFigure = new TextFigure(text);
+    	methodFigureText += ") : " + methodModel.getReturnType();
+    	MethodFigure methodFigure = new MethodFigure(methodFigureText, model, methodModel, getNameFigure());
     	getMethodsCompartment().add(methodFigure);
     }
     
     @Override
     public UmlClassFigure clone() {
+    	// TODO: i'm not sure if this is correct...
     	UmlClassFigure that = (UmlClassFigure) super.clone();
     	that.setModel(new UmlClassModel());
         
-        List<Figure> attrFigureList = that.getAttributesCompartment().getChildren();
-        for(int i = 0; i < attrFigureList.size(); ++i) {
-        	((TextFigure)attrFigureList.get(i)).addFigureListener(new AttributeAdapter(that));
-        }
-        
-        List<Figure> methodFigureList = that.getMethodsCompartment().getChildren();
-        for(int i = 0; i < methodFigureList.size(); ++i) {
-        	((TextFigure)methodFigureList.get(i)).addFigureListener(new MethodAdapter(that));
-        }
-        
-        that.getNameFigure().addFigureListener(new ClassNameAdapter(that));
+    	// work-around for model issue in the class name figure
+        ListFigure nameCompartment = (ListFigure)that.getChild(0);
+        nameCompartment.removeAllChildren();
+        ClassNameFigure classNameFigure = new ClassNameFigure("+ newClass", that.model);
+        nameCompartment.add(classNameFigure);
         
         return that;
     }
     
+    //TODO:update for refactoring changes
     @Override
     public void write(DOMOutput out) throws IOException {
+    	// TODO: have to write static/abstract/interface flags to DOM tree
         Rectangle2D.Double r = getBounds();
         out.addAttribute("x", r.x);
         out.addAttribute("y", r.y);
@@ -537,6 +258,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 
     @Override
     public void read(DOMInput in) throws IOException {
+    	// TODO: have to read static/abstract/interface flags from DOM tree
+    	
     	// remove default text figures
     	this.willChange();
     	getAttributesCompartment().removeAllChildren();
@@ -651,20 +374,53 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     }
         
     @Override
-    //TODO : Move code from figureChanged methods in the adapters above to actionPerformed instead so that
-    //the class names, attributes, and methods will hopefully update as soon as they are entered rather than
-    //when the object is moved.
     public Collection<Action> getActions(Point2D.Double p) {
-    	Collection<Action> actions = new ArrayList<Action>();
+    	// check if our child compartments contained the right-click
+    	if(getAttributesCompartment().contains(p)) {
+    		for(Figure attrFigure : getAttributesCompartment().getChildren()) {
+    			if (attrFigure.contains(p)) return ((AttributeFigure)attrFigure).getActions(p);
+    		}
+    	}
+    	else if(getMethodsCompartment().contains(p)) {
+    		for(Figure methodFigure : getMethodsCompartment().getChildren()) {
+    			if (methodFigure .contains(p)) return ((MethodFigure)methodFigure ).getActions(p);
+    		}
+    	}
+    	// otherwise use actions from self
+    	Collection<Action> actions = new ArrayList<Action>();    	
+    	actions.add(new AbstractAction("Toggle Interface") {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				willChange();
+				model.setInterfaceFlag(!model.getInterfaceFlag());
+				// if is interface, abstract is redundant
+				if (model.getInterfaceFlag()) {
+					model.setAbstractFlag(false);
+					getNameFigure().set(AttributeKeys.FONT_ITALIC, false);
+				}
+				getNameFigure().setText(getNameFigure().getText());
+				changed();
+			}
+    	});
+    	actions.add(new AbstractAction("Toggle Abstract") {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				willChange();
+				model.setAbstractFlag(!model.getAbstractFlag());
+				model.setInterfaceFlag(false);
+				getNameFigure().set(AttributeKeys.FONT_ITALIC, model.getAbstractFlag());
+				getNameFigure().setText(getNameFigure().getText());
+				changed();
+			}
+    	});
+    	
     	actions.add(new AbstractAction("Add Attribute") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-		        // add a new attribute text figure
-				UmlAttributeModel attr = new UmlAttributeModel(AccessModifier.Private, "newAttribute" + uniqAttrId, "Object");
-				getModel().getAttributes().add(attr);
-				drawAttribute(attr);
-		        ++uniqAttrId;
+				UmlAttributeModel attrModel = new UmlAttributeModel(AccessModifier.Private, "newAttribute", "Object");
+				String attrFigureText = attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType();
+				getAttributesCompartment().add(new AttributeFigure(attrFigureText, model, attrModel));
 		        changed();
 			}
     	});
@@ -672,25 +428,29 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				// add a new method text figure
-				UmlMethodModel method = new UmlMethodModel(AccessModifier.Public, "Object", "newMethod" + uniqMethodId, new ArrayList<UmlAttributeModel>());
-				drawMethod(method);
-	        	++uniqMethodId;
+				UmlMethodModel methodModel = new UmlMethodModel(AccessModifier.Public, "Object", "newMethod", new ArrayList<UmlAttributeModel>());
+				
+		    	String methodFigureText = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
+		    	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
+		    		if ( i == methodModel.getParameters().size() - 1)
+		    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
+		    		else
+		    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
+		    	}
+		    	methodFigureText += ") : " + methodModel.getReturnType();
+				
+				getMethodsCompartment().add(new MethodFigure(methodFigureText, model, methodModel, getNameFigure()));
 	        	changed();
 			}
     	});
     	
     	actions.add(new AbstractAction("Generate Code Skeleton File") {
-    		//public final static String id = "edit.addAttribute";
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//willChange();
-				
 				String output = getModel().toString();
 				String fileName = (model.getName() + ".java");
 
 				try {
-
 					PrintWriter outStream = new PrintWriter(fileName);
 
 					outStream.write(output);
@@ -699,10 +459,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
 				}
-
 			}
     	});
-
     	
     	return actions;        
     }
