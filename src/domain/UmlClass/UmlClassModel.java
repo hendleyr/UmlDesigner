@@ -9,8 +9,8 @@ public class UmlClassModel {
 	private List<UmlAssociationModel> _associations;
 	private List<UmlAttributeModel> _attributes;
 	private List<UmlMethodModel> _methods;
-	private boolean _isAbstract; 	// TODO: modify toString
-	private boolean _isInterface; 	// TODO: modify toString
+	private boolean _isAbstract; 	
+	private boolean _isInterface; 	
 
 	public UmlClassModel() {
 		this(AccessModifier.Public, "newClass");
@@ -178,8 +178,18 @@ public class UmlClassModel {
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append(getAccessModifier().toString().toLowerCase()).append(" class ")
+		if (_isInterface) {
+			sb.append(getAccessModifier().toString().toLowerCase()).append(" interface ")
 				.append(getName()).append(" ");
+		}
+		else if (_isAbstract) {
+			sb.append(getAccessModifier().toString().toLowerCase()).append(" abstract class ")
+				.append(getName()).append(" ");
+		}
+		else {
+			sb.append(getAccessModifier().toString().toLowerCase()).append(" class ")
+				.append(getName()).append(" ");
+		}
 
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().equals("Inheritance")) {
