@@ -177,19 +177,20 @@ public class UmlClassModel {
 	// code skeleton
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
+			
+		sb.append(getAccessModifier().toString().toLowerCase()).append(" ");
 		
-		if (_isInterface) {
-			sb.append(getAccessModifier().toString().toLowerCase()).append(" interface ")
-				.append(getName()).append(" ");
+		if (getInterfaceFlag()) {
+			sb.append("interface ");
 		}
-		else if (_isAbstract) {
-			sb.append(getAccessModifier().toString().toLowerCase()).append(" abstract class ")
-				.append(getName()).append(" ");
+		else if (getAbstractFlag()) {
+			sb.append("abstract class ");
 		}
 		else {
-			sb.append(getAccessModifier().toString().toLowerCase()).append(" class ")
-				.append(getName()).append(" ");
+			sb.append("class ");
 		}
+		
+		sb.append(getName()).append(" ");
 
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().equals("Inheritance")) {
@@ -203,15 +204,27 @@ public class UmlClassModel {
 		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
-			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ")
-					.append(value.getType()).append(" ")
-					.append(value.getName()).append(";\n");
+			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
+			if (value.getStaticFlag()) {
+				sb.append("static ");
+			}
+			sb.append(value.getType()).append(" ");
+			sb.append(value.getName()).append(";\n");
 		}
+		
 		sb.append("\n");
 
 		for (UmlMethodModel value : _methods) {
 			sb.append("\t");
 			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
+			
+			if (value.getStaticFlag()) {
+				sb.append("static ");
+			}
+			else if (value.getAbstractFlag()) {
+				sb.append("abstract ");
+			}
+				
 			sb.append(value.getReturnType()).append(" ");
 			sb.append(value.getName()).append(" (");
 			for(int i = 0; i < value.getParameters().size(); ++ i) { 
