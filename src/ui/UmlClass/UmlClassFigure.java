@@ -20,7 +20,6 @@ import org.jhotdraw.draw.Figure;
 import org.jhotdraw.draw.GraphicalCompositeFigure;
 import org.jhotdraw.draw.ListFigure;
 import org.jhotdraw.draw.RectangleFigure;
-import org.jhotdraw.draw.TextFigure;
 import javax.swing.AbstractAction;
 import org.jhotdraw.draw.layouter.VerticalLayouter;
 import org.jhotdraw.geom.Insets2D;
@@ -80,23 +79,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         // supply a default class name
         ClassNameFigure classNameFigure = new ClassNameFigure("+ newClass", model);
         nameCompartment.add(classNameFigure);
-        
-        // supply a default attr
-//        String attrName = "newAttribute";
-//        String attrType = "Object";
-//        AccessModifier attrAccessMod = AccessModifier.Private;
-//        UmlAttributeModel attrModel = new UmlAttributeModel(attrAccessMod, attrName, attrType);
-//        AttributeFigure attrFigure = new AttributeFigure(attrAccessMod.getSymbol() + " " + attrName + " : " + attrType, model, attrModel);
-//        attributesCompartment.add(attrFigure);
-        
-        // supply a default method
-//        AccessModifier methodAccessMod = AccessModifier.Public;
-//        String methodName = "newMethod";
-//        String methodType = "Object";
-//        List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
-//        UmlMethodModel methodModel = new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams);
-//        MethodFigure methodFigure = new MethodFigure(methodAccessMod.getSymbol() + " " + methodName + "(" + ")" + " : " + methodType, model, methodModel);
-//        methodsCompartment.add(methodFigure);
     }
     
     protected ClassNameFigure getNameFigure() {
@@ -375,17 +357,19 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         
     @Override
     public Collection<Action> getActions(Point2D.Double p) {
-    	// check if our child compartments contained the right-click
-    	if(getAttributesCompartment().contains(p)) {
-    		for(Figure attrFigure : getAttributesCompartment().getChildren()) {
-    			if (attrFigure.contains(p)) return ((AttributeFigure)attrFigure).getActions(p);
-    		}
-    	}
-    	else if(getMethodsCompartment().contains(p)) {
-    		for(Figure methodFigure : getMethodsCompartment().getChildren()) {
-    			if (methodFigure .contains(p)) return ((MethodFigure)methodFigure ).getActions(p);
-    		}
-    	}
+    	// check if our child compartments contained the right-click (check null for testability workaround)
+    	if (p != null) {
+    		if(getAttributesCompartment().contains(p)) {
+        		for(Figure attrFigure : getAttributesCompartment().getChildren()) {
+        			if (attrFigure.contains(p)) return ((AttributeFigure)attrFigure).getActions(p);
+        		}
+        	}
+        	else if(getMethodsCompartment().contains(p)) {
+        		for(Figure methodFigure : getMethodsCompartment().getChildren()) {
+        			if (methodFigure .contains(p)) return ((MethodFigure)methodFigure ).getActions(p);
+        		}
+        	}    		
+    	}    	
     	// otherwise use actions from self
     	Collection<Action> actions = new ArrayList<Action>();    	
     	actions.add(new AbstractAction("Toggle Interface") {

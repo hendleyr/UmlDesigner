@@ -1,24 +1,40 @@
 package domain.UmlClass;
 
 public class UmlAssociationModel {
-	private AssociationType type;
-	private UmlClassModel target;
+	private AssociationType _type;
+	private UmlClassModel _target;
+	private String _roleName;
 	
 	public UmlAssociationModel(UmlClassModel target, AssociationType type) {
-		this.target = target;
-		this.type = type;
+		_target = target;
+		_type = type;
+		_roleName = "";
+	}
+	
+	public UmlAssociationModel(UmlClassModel target, AssociationType type, String roleName) {
+		_target = target;
+		_type = type;
+		_roleName = roleName;
 	}
 
 	public AssociationType getType() {
-		return type;
+		return _type;
 	}
 	public void setType(AssociationType type) {
-		this.type = type;
+		this._type = type;
 	}
 	public UmlClassModel getTarget() {
-		return target;
+		return _target;
 	}
 	public void setTarget(UmlClassModel target) {
-		this.target = target;
+		this._target = target;
+	}
+
+	public String getRoleName() {
+		return _roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this._roleName = roleName;
 	}
 }
