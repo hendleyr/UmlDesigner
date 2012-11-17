@@ -162,7 +162,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         out.openElement("classModel");
         	out.openElement("classAccessModifier");
         		out.addText("" + getModel().getAccessModifier().getSymbol());
-        		//out.writeObject(getModel().getAccessModifier());
         	out.closeElement();
         
 	        out.openElement("className");
@@ -241,9 +240,9 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     @Override
     public void read(DOMInput in) throws IOException {
     	// TODO: have to read static/abstract/interface flags from DOM tree
-    	
-    	// remove default text figures
+
     	this.willChange();
+    	// remove default text figures
     	getAttributesCompartment().removeAllChildren();
     	getMethodsCompartment().removeAllChildren();
     	

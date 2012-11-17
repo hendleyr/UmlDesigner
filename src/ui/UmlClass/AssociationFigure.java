@@ -2,7 +2,6 @@ package ui.UmlClass;
 
 import org.jhotdraw.draw.connector.Connector;
 import org.jhotdraw.draw.decoration.ArrowTip;
-import org.jhotdraw.draw.layouter.HorizontalLayouter;
 import org.jhotdraw.draw.layouter.LocatorLayouter;
 import org.jhotdraw.draw.liner.ElbowLiner;
 import org.jhotdraw.draw.locator.BezierLabelLocator;
@@ -58,6 +57,8 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
         setAttributeEnabled(END_DECORATION, true);
         setAttributeEnabled(START_DECORATION, true);
         setAttributeEnabled(STROKE_DASHES, true);
+        
+        // roles will become RoleFigure objects, probably move instantiation to handleConnect()
         
         startMultiplicity = new TextFigure("start mult");
         startRole = new TextFigure("start role");
