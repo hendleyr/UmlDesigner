@@ -90,20 +90,20 @@ public class TestUmlClassModel{
 		// added some syntactic sugar to add/remove Associations
 		
 		//test adding one association
-		UmlAssociationModel assocA = testModel.addAssociation(targetModel, AssociationType.Inheritance);
+		UmlAssociationModel assocA = testModel.addAssociation(targetModel.getName(), AssociationType.Inheritance);
 		assertTrue(assocA != null);
 		assertTrue(testModel.getAssociations().get(0).equals(assocA));
 		
 		//test adding duplicate association
-		assertTrue(testModel.addAssociation(targetModel, AssociationType.Inheritance) == null);
+		assertTrue(testModel.addAssociation(targetModel.getName(), AssociationType.Inheritance) == null);
 		assertTrue(testModel.getAssociations().size() == 1);
 		
 		//test adding association with same target but different associationType
-		assertTrue(testModel.addAssociation(targetModel, AssociationType.Composition) == null);
+		assertTrue(testModel.addAssociation(targetModel.getName(), AssociationType.Composition) == null);
 		assertTrue(testModel.getAssociations().size() == 1);
 			
 		//test adding a new association to the first one
-		UmlAssociationModel assocB = testModel.addAssociation(anotherModel, AssociationType.Inheritance);
+		UmlAssociationModel assocB = testModel.addAssociation(anotherModel.getName(), AssociationType.Inheritance);
 		assertTrue(assocB != null);
 		assertTrue(testModel.getAssociations().get(1).equals(assocB));		
 	}
@@ -111,8 +111,8 @@ public class TestUmlClassModel{
 	@Test
 	public void testRemoveAssociation() {
 		//add two associations in preparation for removal
-		UmlAssociationModel assocA = testModel.addAssociation(targetModel, AssociationType.Inheritance);
-		UmlAssociationModel assocB = testModel.addAssociation(anotherModel, AssociationType.Inheritance);
+		UmlAssociationModel assocA = testModel.addAssociation(targetModel.getName(), AssociationType.Inheritance);
+		UmlAssociationModel assocB = testModel.addAssociation(anotherModel.getName(), AssociationType.Inheritance);
 		assertTrue(assocA != null);
 		assertTrue(assocB != null);
 		//remove an association
@@ -127,14 +127,14 @@ public class TestUmlClassModel{
 		//test two classes with no associations
 		assertFalse(testModel.hasInheritanceCycle(targetModel));
 		//create non-inheritance relationship between two classes
-		targetModel.addAssociation(testModel, AssociationType.Dependency);
+		targetModel.addAssociation(testModel.getName(), AssociationType.Dependency);
 		assertFalse(testModel.hasInheritanceCycle(targetModel));
 		//create inheritance relationship in target class to non-tested class
-		targetModel.addAssociation(anotherModel, AssociationType.Inheritance);
+		targetModel.addAssociation(anotherModel.getName(), AssociationType.Inheritance);
 		assertFalse(testModel.hasInheritanceCycle(targetModel));
 		//create inheritance relationship in target class to tested class
 		targetModel.removeAssociation(testModel);
-		targetModel.addAssociation(testModel, AssociationType.Inheritance);
+		targetModel.addAssociation(testModel.getName(), AssociationType.Inheritance);
 		assertTrue(testModel.hasInheritanceCycle(targetModel));
 	}
 	
@@ -186,7 +186,7 @@ public class TestUmlClassModel{
 	@Test
 	public void testToString() {
 		// quick and dirty test to verify that mysterious [] characters are no longer displayed
-		testModel.addAssociation(targetModel, AssociationType.Inheritance);
+		testModel.addAssociation(targetModel.getName(), AssociationType.Inheritance);
 		UmlAttributeModel paramA = new UmlAttributeModel();
 		UmlAttributeModel paramB = new UmlAttributeModel();
 		ArrayList<UmlAttributeModel> params = new ArrayList<UmlAttributeModel>();

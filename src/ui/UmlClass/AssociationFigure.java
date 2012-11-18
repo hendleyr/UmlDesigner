@@ -43,7 +43,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	
     /** Creates a new instance. */
     public AssociationFigure() {
-    	associationModel = new UmlAssociationModel(null, null);
+    	associationModel = new UmlAssociationModel(null, AssociationType.Dependency);
     	isBidirectional = false;
     	setLiner(new ElbowLiner());
     	
@@ -128,9 +128,9 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     	UmlClassFigure sf = (UmlClassFigure) start.getOwner();
     	UmlClassFigure ef = (UmlClassFigure) end.getOwner();
 
-    	associationModel.setTarget(ef.getModel());    	
-        sf.getModel().addAssociation(associationModel.getTarget(), associationModel.getType());
-        if (isBidirectional) ef.getModel().addAssociation(sf.getModel(), associationModel.getType());
+    	associationModel.setTarget(ef.getModel().getName());
+        sf.getModel().addAssociation(ef.getModel().getName(), associationModel.getType());
+        if (isBidirectional) ef.getModel().addAssociation(sf.getModel().getName(), associationModel.getType());
         
         // store an internal reference to class figures for use in actions later
         startFigure = sf;
@@ -216,7 +216,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				// change start decoration to matching small arrow
 				if(associationModel.getType() != AssociationType.Inheritance && isBidirectional) {
 					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
-					endFigure.getModel().addAssociation(startFigure.getModel(), associationModel.getType());
+					endFigure.getModel().addAssociation(startFigure.getModel().getName(), associationModel.getType());
 				}			
 				else {
 					set(START_DECORATION, null);

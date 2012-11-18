@@ -24,30 +24,27 @@ public class UmlClassModel {
 		_methods = new ArrayList<UmlMethodModel>();
 	}
 
-	public UmlAssociationModel addAssociation(UmlClassModel target,
+	public UmlAssociationModel addAssociation(String assocTarget,
 			AssociationType associationType) {
-		if (target == null || associationType == null) return null;
+		if (assocTarget == null || associationType == null) return null;
 		// if associations set includes a UmlAssociationModel with SAME target
 		// and a
 		// DIFFERENT associationType, throw exception
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().getName().equals(target.getName())
-					&& !association.getType().equals(associationType)) {
+			if (association.getTarget().equals(assocTarget) && !association.getType().equals(associationType)) {
 				return null;
 			}
 		}
 
 		// do nothing if association already exists
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().getName().equals(target.getName())
-					&& association.getType().equals(associationType)) {
+			if (association.getTarget().equals(assocTarget) && association.getType().equals(associationType)) {
 				return null;
 			}
 		}
 
 		// add new UmlAssociationModel
-		UmlAssociationModel newAssociationModel = new UmlAssociationModel(
-				target, associationType);
+		UmlAssociationModel newAssociationModel = new UmlAssociationModel(assocTarget, associationType);
 		_associations.add(newAssociationModel);
 		return newAssociationModel;
 	}
@@ -57,9 +54,7 @@ public class UmlClassModel {
 		// exception
 		for (UmlAssociationModel associationA : _associations) {
 			for (UmlAssociationModel associationB : _associations) {
-				if (associationA.getTarget().getName()
-						.equals(associationB.getTarget().getName())
-						&& !associationA.equals(associationB)) {
+				if (associationA.getTarget().equals(associationB.getTarget()) && !associationA.equals(associationB)) {
 					return null;
 				}
 			}
@@ -67,7 +62,7 @@ public class UmlClassModel {
 		// if association does not exist in the set, throw exception
 		boolean associationFound = false;
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().getName().equals(target.getName())) {
+			if (association.getTarget().equals(target.getName())) {
 				associationFound = true;
 				break;
 			}
@@ -78,7 +73,7 @@ public class UmlClassModel {
 
 		// remove the UmlAssociationModel
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().getName().equals(target.getName())) {
+			if (association.getTarget().equals(target.getName())) {
 				_associations.remove(association);
 				return association;
 			}
@@ -94,7 +89,7 @@ public class UmlClassModel {
 		// if target inherits from this, return true
 		List<UmlAssociationModel> targetAssociations = target.getAssociations();
 		for (UmlAssociationModel association : targetAssociations) {
-			if (association.getTarget() == this
+			if (association.getTarget() == this.getName()
 					&& association.getType() == AssociationType.Inheritance)
 				return true;
 		}
@@ -195,7 +190,7 @@ public class UmlClassModel {
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().equals("Inheritance")) {
 				sb.append("Extends ");
-				sb.append(association.getTarget().getName());
+				sb.append(association.getTarget());
 			}
 			
 		}

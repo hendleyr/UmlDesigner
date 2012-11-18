@@ -154,12 +154,14 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
     //TODO:update for refactoring changes
     @Override
     public void write(DOMOutput out) throws IOException {
-    	// TODO: have to write static/abstract/interface flags to DOM tree
         Rectangle2D.Double r = getBounds();
         out.addAttribute("x", r.x);
         out.addAttribute("y", r.y);
         writeAttributes(out);
         out.openElement("classModel");
+	    	out.addAttribute("classAbstractFlag", getModel().getAbstractFlag());
+	    	out.addAttribute("classInterfaceFlag", getModel().getInterfaceFlag());
+        
         	out.openElement("classAccessModifier");
         		out.addText("" + getModel().getAccessModifier().getSymbol());
         	out.closeElement();
@@ -172,11 +174,11 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 		        for(UmlAssociationModel assoc : getModel().getAssociations()) {
 		        	out.openElement("assoc");
 			        	out.openElement("assocType");
-			        		out.writeObject(assoc.getType());
+			        		out.addText(assoc.getType().toString());
 			        	out.closeElement();
 			        	
 			        	out.openElement("assocTarget");
-			        		out.writeObject(assoc.getTarget());
+			        		out.addText(assoc.getTarget());
 			        	out.closeElement();
 		        	out.closeElement();
 		        }
@@ -185,9 +187,10 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	        out.openElement("classAttributes");
 		        for(UmlAttributeModel attr : getModel().getAttributes()) {
 		        	out.openElement("attr");
+		        		out.addAttribute("attrStaticFlag", attr.getStaticFlag());
+		        	
 			        	out.openElement("attrAccessModifier");
 			        		out.addText(""+attr.getAccessModifier().getSymbol());
-			        		//out.writeObject(attr.getAccessModifier());
 			        	out.closeElement();
 			        	
 			        	out.openElement("attrName");
@@ -204,9 +207,11 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	        out.openElement("methods");
 		        for(UmlMethodModel method : getModel().getMethods()) {
 		        	out.openElement("method");
+		        		out.addAttribute("methodAbstractFlag", method.getAbstractFlag());
+		        		out.addAttribute("methodStaticFlag", method.getStaticFlag());
+		        		
 			        	out.openElement("methodAccessModifier");
 			        		out.addText(""+method.getAccessModifier().getSymbol());
-			        	//out.writeObject(method.getAccessModifier());
 			        	out.closeElement();
 			        	
 			        	out.openElement("methodType");
@@ -239,8 +244,6 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 
     @Override
     public void read(DOMInput in) throws IOException {
-    	// TODO: have to read static/abstract/interface flags from DOM tree
-
     	this.willChange();
     	// remove default text figures
     	getAttributesCompartment().removeAllChildren();
@@ -253,12 +256,15 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         setBounds(new Point2D.Double(x, y), new Point2D.Double(x + w, y + h));
         readAttributes(in);
         in.openElement("classModel");
+        	getModel().setAbstractFlag(in.getAttribute("classAbstractFlag", false));
+        	getModel().setInterfaceFlag(in.getAttribute("classInterfaceFlag", false));
+        	readAttributes(in);
+        
 	        in.openElement("classAccessModifier");
 	        	String classAccessMod = in.getText();	// workaround for enum issue
 	        	if (classAccessMod.equals("+")) getModel().setAccessModifier(AccessModifier.Public);
 	        	else if (classAccessMod.equals("-")) getModel().setAccessModifier(AccessModifier.Private);
 	        	else getModel().setAccessModifier(AccessModifier.Protected);
-	        	//getModel().setAccessModifier((AccessModifier)in.readObject());
 	        in.closeElement();
 	        in.openElement("className");
 	        	getModel().setName(in.getText());
@@ -266,31 +272,37 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	        drawClass();
 	        
 	        in.openElement("classAssociations");
-	        	List<UmlAssociationModel> assocList = new ArrayList<UmlAssociationModel>();
 	        	for (int i = 0; i < in.getElementCount("assoc"); ++i) {
 	        		in.openElement("assoc");
-			        	in.openElement("assocType");
-			        		AssociationType assocType = (AssociationType) in.readObject();
+			        	in.openElement("assocType");	
+			        		String assocText = in.getText();
+			        		AssociationType assocType;	// work-around for recurring enum issue...
+			        		if (assocText.equals("Inheritance")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Implementation")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Aggregation")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Composition")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Dependency")) assocType = AssociationType.Inheritance;
+			        		else assocType = AssociationType.Inheritance;
 			        	in.closeElement();
 			        	in.openElement("assocTarget");
-			        		UmlClassModel assocTarget = (UmlClassModel) in.readObject();
+			        		String assocTarget = in.getText();
 			        	in.closeElement();
 		        	in.closeElement();
 		        	getModel().addAssociation(assocTarget, assocType);
 	        	}
-	        	getModel().setAssociations(assocList);
 	        in.closeElement();
 	        
 	        in.openElement("classAttributes");
 		        for(int i = 0; i < in.getElementCount("attr"); ++i) {
 		        	in.openElement("attr");
+		        		boolean attrStatic = in.getAttribute("attrStaticFlag", false);
+		        		readAttributes(in);
 			        	in.openElement("attrAccessModifier");
 			        		AccessModifier attrAccessMod;
 				        	String attrAccessModText = in.getText();	// workaround for enum issue
 				        	if (attrAccessModText.equals("+")) attrAccessMod = AccessModifier.Public;
 				        	else if (attrAccessModText.equals("-")) attrAccessMod = AccessModifier.Private;
 				        	else attrAccessMod = AccessModifier.Protected;
-			        		//AccessModifier attrAccessMod = (AccessModifier) in.readObject();
 			        	in.closeElement();
 			        	
 			        	in.openElement("attrName");
@@ -302,7 +314,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			        	in.closeElement();
 		        	in.closeElement();
 		        	UmlAttributeModel attrModel = new UmlAttributeModel(attrAccessMod, attrName, attrType);
-		        	getModel().addAttribute(attrModel);
+		        	attrModel.setStaticFlag(attrStatic);
+		        	//getModel().addAttribute(attrModel);
 		        	drawAttribute(attrModel);
 		        }
 	        in.closeElement();
@@ -311,13 +324,15 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 	        List<UmlMethodModel> methods = new ArrayList<UmlMethodModel>();
 	        for(int i = 0; i < in.getElementCount("method"); ++i) {
 	        	in.openElement("method");
+	        		boolean methodAbstract = in.getAttribute("methodAbstractFlag", false);
+	        		boolean methodStatic = in.getAttribute("methodStaticFlag", false);
+	        		readAttributes(in);
 		        	in.openElement("methodAccessModifier");
 		        		AccessModifier methodAccessMod;
 			        	String methodAccessModText = in.getText();	// workaround for enum issue
 			        	if (methodAccessModText.equals("+")) methodAccessMod = AccessModifier.Public;
 			        	else if (methodAccessModText.equals("-")) methodAccessMod = AccessModifier.Private;
 			        	else methodAccessMod = AccessModifier.Protected;
-		        		//AccessModifier methodAccessMod = (AccessModifier) in.readObject();
 		        	in.closeElement();
 		        	
 		        	in.openElement("methodType");
@@ -345,6 +360,8 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 		        	in.closeElement();
 	        	in.closeElement();
 	        	UmlMethodModel methodModel = new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams);
+	        	methodModel.setAbstractFlag(methodAbstract);
+	        	methodModel.setStaticFlag(methodStatic);
 	        	methods.add(methodModel);
 	        	drawMethod(methodModel);
 	        }

@@ -9,6 +9,7 @@ import org.jhotdraw.draw.TextFigure;
 import org.jhotdraw.draw.connector.ChopRectangleConnector;
 import org.jhotdraw.draw.connector.LocatorConnector;
 import org.jhotdraw.draw.decoration.ArrowTip;
+import org.jhotdraw.draw.liner.ElbowLiner;
 import org.jhotdraw.draw.locator.RelativeLocator;
 import org.jhotdraw.xml.DefaultDOMFactory;
 
@@ -16,6 +17,7 @@ import ui.UmlClass.AssociationFigure;
 import ui.UmlClass.AttributeFigure;
 import ui.UmlClass.ClassNameFigure;
 import ui.UmlClass.MethodFigure;
+import ui.UmlClass.RoleFigure;
 import ui.UmlClass.SeparatorFigure;
 import ui.UmlClass.UmlClassFigure;
 import domain.UmlClass.AccessModifier;
@@ -35,8 +37,9 @@ public class UmlDesignerFactory extends DefaultDOMFactory {
         { ClassNameFigure.class, "classNameFigure" },
         { AttributeFigure.class, "attributeFigure" },
         { MethodFigure.class, "methodFigure" },
-        
+        { RoleFigure.class, "role" },
         { AssociationFigure.class, "association" },
+        { ElbowLiner.class, "elbowLiner" },
         { ChopRectangleConnector.class, "rectConnector" },
         { LocatorConnector.class, "locConnector" },
         { RelativeLocator.class, "relativeLocator" },
