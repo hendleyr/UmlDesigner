@@ -21,6 +21,10 @@ public class TestUmlClassModel{
 	private UmlClassModel testClass5;
 	private UmlClassModel testClass6;
 	private UmlClassModel testClass7;
+	private UmlClassModel testClass8;
+	private UmlClassModel testClass9;
+	//private UmlClassModel testClass13;
+	
 	private UmlAttributeModel testAttribute;
 	private UmlAttributeModel anotherAttribute;
 	private UmlAttributeModel nonexistentAttribute;
@@ -32,6 +36,8 @@ public class TestUmlClassModel{
 	private UmlMethodModel testMethod5;
 	private UmlMethodModel testMethod6;
 	private UmlMethodModel testMethod7;
+	private UmlAttributeModel testAttribute8;
+	private UmlAttributeModel testAttribute9;
 	private ArrayList<UmlAttributeModel> testAttributeList5;
 	
 	@Before
@@ -61,6 +67,8 @@ public class TestUmlClassModel{
 		testClass5 = new UmlClassModel(AccessModifier.Public, "MethodWithParamTest");
 		testClass6 = new UmlClassModel(AccessModifier.Public, "StaticMethodTest");
 		testClass7 = new UmlClassModel(AccessModifier.Public, "AbstractMethodTest");
+		testClass8 = new UmlClassModel(AccessModifier.Public, "NonStaticAttributeTest");
+		testClass9 = new UmlClassModel(AccessModifier.Public, "StaticAttributeTest");
 		
 		//testMethods
 		testMethod4 = new UmlMethodModel(AccessModifier.Private, "void", "plainMethod", new ArrayList<UmlAttributeModel>());
@@ -70,6 +78,8 @@ public class TestUmlClassModel{
 		
 		//testAttributes
 		testAttribute5 = new UmlAttributeModel(AccessModifier.Private, "testParameter", "void");
+		testAttribute8 = new UmlAttributeModel(AccessModifier.Private, "testAttribute", "String");
+		testAttribute9 = new UmlAttributeModel(AccessModifier.Private, "testAttribute2", "String");
 		
 		//testAttributeLists
 		testAttributeList5 = new ArrayList<UmlAttributeModel>();
@@ -231,8 +241,16 @@ public class TestUmlClassModel{
 		assertEquals("public class AbstractMethodTest  {\n\n\tprivate abstract void abstractMethod () {\n\n\t}\n}\n", codeSkel7);
 		
 		//TODO: Test 8: class with a non-static attribute
+		testAttribute8.setStaticFlag(false);
+		testClass8.addAttribute(testAttribute8);
+		String codeSkel8 = testClass8.toString();
+		assertEquals("public class NonStaticAttributeTest  {\n\tprivate String testAttribute;\n\n}\n", codeSkel8);
 		
 		//TODO: Test 9: class with a static attribute
+		testAttribute9.setStaticFlag(true);
+		testClass9.addAttribute(testAttribute9);
+		String codeSkel9 = testClass9.toString();
+		assertEquals("public class StaticAttributeTest  {\n\tprivate static String testAttribute2;\n\n}\n", codeSkel9);
 		
 		//TODO: Test 10: class with an aggregation association
 		
