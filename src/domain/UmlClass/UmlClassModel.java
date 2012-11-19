@@ -190,9 +190,8 @@ public class UmlClassModel {
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().toString().equals("Dependency")) {
 				sb.append("extends ");
-				sb.append(association.getTarget());
-			}
-			
+				sb.append(association.getTarget()).append(" ");
+			}			
 		}
 			
 		sb.append(" {\n"); 

@@ -23,7 +23,10 @@ public class TestUmlClassModel{
 	private UmlClassModel testClass7;
 	private UmlClassModel testClass8;
 	private UmlClassModel testClass9;
-	//private UmlClassModel testClass13;
+	private UmlClassModel testClass10;
+	private UmlClassModel testClass11;
+	private UmlClassModel testClass12;
+	private UmlClassModel testClass13;
 	
 	private UmlAttributeModel testAttribute;
 	private UmlAttributeModel anotherAttribute;
@@ -36,8 +39,10 @@ public class TestUmlClassModel{
 	private UmlMethodModel testMethod5;
 	private UmlMethodModel testMethod6;
 	private UmlMethodModel testMethod7;
+	private UmlMethodModel testMethod13;
 	private UmlAttributeModel testAttribute8;
 	private UmlAttributeModel testAttribute9;
+	private UmlAttributeModel testAttribute13;
 	private ArrayList<UmlAttributeModel> testAttributeList5;
 	
 	@Before
@@ -69,17 +74,20 @@ public class TestUmlClassModel{
 		testClass7 = new UmlClassModel(AccessModifier.Public, "AbstractMethodTest");
 		testClass8 = new UmlClassModel(AccessModifier.Public, "NonStaticAttributeTest");
 		testClass9 = new UmlClassModel(AccessModifier.Public, "StaticAttributeTest");
+		testClass13 = new UmlClassModel(AccessModifier.Public, "MethodWithAttrTest");
 		
 		//testMethods
 		testMethod4 = new UmlMethodModel(AccessModifier.Private, "void", "plainMethod", new ArrayList<UmlAttributeModel>());
 		testMethod5 = new UmlMethodModel(AccessModifier.Private, "void", "methodWithParam", new ArrayList<UmlAttributeModel>());
 		testMethod6 = new UmlMethodModel(AccessModifier.Private, "void", "staticMethod", new ArrayList<UmlAttributeModel>());
 		testMethod7 = new UmlMethodModel(AccessModifier.Private, "void", "abstractMethod", new ArrayList<UmlAttributeModel>());
+		testMethod13 = new UmlMethodModel(AccessModifier.Private, "void", "methodWithAttr", new ArrayList<UmlAttributeModel>());
 		
 		//testAttributes
 		testAttribute5 = new UmlAttributeModel(AccessModifier.Private, "testParameter", "void");
 		testAttribute8 = new UmlAttributeModel(AccessModifier.Private, "testAttribute", "String");
 		testAttribute9 = new UmlAttributeModel(AccessModifier.Private, "testAttribute2", "String");
+		testAttribute13 = new UmlAttributeModel(AccessModifier.Private, "testAttribute13", "String");
 		
 		//testAttributeLists
 		testAttributeList5 = new ArrayList<UmlAttributeModel>();
@@ -240,13 +248,13 @@ public class TestUmlClassModel{
 		String codeSkel7 = testClass7.toString();
 		assertEquals("public class AbstractMethodTest  {\n\n\tprivate abstract void abstractMethod () {\n\n\t}\n}\n", codeSkel7);
 		
-		//TODO: Test 8: class with a non-static attribute
+		//Test 8: class with a non-static attribute
 		testAttribute8.setStaticFlag(false);
 		testClass8.addAttribute(testAttribute8);
 		String codeSkel8 = testClass8.toString();
 		assertEquals("public class NonStaticAttributeTest  {\n\tprivate String testAttribute;\n\n}\n", codeSkel8);
 		
-		//TODO: Test 9: class with a static attribute
+		//Test 9: class with a static attribute
 		testAttribute9.setStaticFlag(true);
 		testClass9.addAttribute(testAttribute9);
 		String codeSkel9 = testClass9.toString();
@@ -259,5 +267,10 @@ public class TestUmlClassModel{
 		//TODO: Test 12: class that inherits from another class
 		
 		//TODO: Test 13: a class with both a method and an attribute
+		testClass13.addAttribute(testAttribute13);
+		testClass13.addMethod(testMethod13);
+		String codeSkel13 = testClass13.toString();
+		assertEquals("public class MethodWithAttrTest  {\n\tprivate String testAttribute13;\n\n" +
+				"\tprivate void methodWithAttr () {\n\n\t}\n}\n", codeSkel13);
 	}
 }
