@@ -25,7 +25,8 @@ public class TestUmlClassModel{
 	private UmlClassModel testClass9;
 	private UmlClassModel testClass10;
 	private UmlClassModel testClass11;
-	private UmlClassModel testClass12;
+	private UmlClassModel testClass12a;
+	private UmlClassModel testClass12b;
 	private UmlClassModel testClass13;
 	
 	private UmlAttributeModel testAttribute;
@@ -74,6 +75,8 @@ public class TestUmlClassModel{
 		testClass7 = new UmlClassModel(AccessModifier.Public, "AbstractMethodTest");
 		testClass8 = new UmlClassModel(AccessModifier.Public, "NonStaticAttributeTest");
 		testClass9 = new UmlClassModel(AccessModifier.Public, "StaticAttributeTest");
+		testClass12a = new UmlClassModel(AccessModifier.Public, "InheritedFromTestClass");
+		testClass12b = new UmlClassModel(AccessModifier.Public, "InheritedClassTest");
 		testClass13 = new UmlClassModel(AccessModifier.Public, "MethodWithAttrTest");
 		
 		//testMethods
@@ -265,6 +268,9 @@ public class TestUmlClassModel{
 		//TODO: Test 11: class with a dependency association
 		
 		//TODO: Test 12: class that inherits from another class
+		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Dependency);
+		String codeSkel12 = testClass12b.toString();
+		assertEquals("public class InheritedClassTest extends InheritedFromTestClass  {\n\n}\n", codeSkel12);
 		
 		//TODO: Test 13: a class with both a method and an attribute
 		testClass13.addAttribute(testAttribute13);
