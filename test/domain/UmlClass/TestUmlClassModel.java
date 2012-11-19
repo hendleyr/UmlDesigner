@@ -267,12 +267,12 @@ public class TestUmlClassModel{
 		
 		//TODO: Test 11: class with a dependency association
 		
-		//TODO: Test 12: class that inherits from another class
-		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Dependency);
+		//Test 12: class that inherits from another class
+		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Inheritance);
 		String codeSkel12 = testClass12b.toString();
 		assertEquals("public class InheritedClassTest extends InheritedFromTestClass  {\n\n}\n", codeSkel12);
 		
-		//TODO: Test 13: a class with both a method and an attribute
+		//Test 13: a class with both a method and an attribute
 		testClass13.addAttribute(testAttribute13);
 		testClass13.addMethod(testMethod13);
 		String codeSkel13 = testClass13.toString();
