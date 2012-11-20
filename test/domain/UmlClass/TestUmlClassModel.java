@@ -23,8 +23,10 @@ public class TestUmlClassModel{
 	private UmlClassModel testClass7;
 	private UmlClassModel testClass8;
 	private UmlClassModel testClass9;
-	private UmlClassModel testClass10;
-	private UmlClassModel testClass11;
+	private UmlClassModel testClass10a;
+	private UmlClassModel testClass10b;
+	private UmlClassModel testClass11a;
+	private UmlClassModel testClass11b;
 	private UmlClassModel testClass12a;
 	private UmlClassModel testClass12b;
 	private UmlClassModel testClass13;
@@ -75,6 +77,10 @@ public class TestUmlClassModel{
 		testClass7 = new UmlClassModel(AccessModifier.Public, "AbstractMethodTest");
 		testClass8 = new UmlClassModel(AccessModifier.Public, "NonStaticAttributeTest");
 		testClass9 = new UmlClassModel(AccessModifier.Public, "StaticAttributeTest");
+		testClass10a = new UmlClassModel(AccessModifier.Public, "AggregationTestClass");
+		testClass10b = new UmlClassModel(AccessModifier.Public, "AggregateObjects");
+		testClass11a = new UmlClassModel(AccessModifier.Public, "DependencyTest");
+		testClass11b = new UmlClassModel(AccessModifier.Public, "DependedOnClass");
 		testClass12a = new UmlClassModel(AccessModifier.Public, "InheritedFromTestClass");
 		testClass12b = new UmlClassModel(AccessModifier.Public, "InheritedClassTest");
 		testClass13 = new UmlClassModel(AccessModifier.Public, "MethodWithAttrTest");
@@ -264,8 +270,14 @@ public class TestUmlClassModel{
 		assertEquals("public class StaticAttributeTest  {\n\tprivate static String testAttribute2;\n\n}\n", codeSkel9);
 		
 		//TODO: Test 10: class with an aggregation association
+		testClass10b.addAssociation("AggregationTestClass", AssociationType.Aggregation);
+		String codeSkel10 = testClass10b.toString();
+		assertEquals("public class AggregateObjects aggregate of AggregationTestClass  {\n\n}\n", codeSkel10);
 		
 		//TODO: Test 11: class with a dependency association
+		testClass11b.addAssociation("DependedOnClass", AssociationType.Dependency);
+		String codeSkel11 = testClass11b.toString();
+		assertEquals("public class DependedOnClass dependent of DependedOnClass  {\n\n}\n", codeSkel11);
 		
 		//Test 12: class that inherits from another class
 		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Inheritance);

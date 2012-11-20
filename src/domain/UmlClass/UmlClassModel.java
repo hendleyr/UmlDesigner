@@ -191,7 +191,15 @@ public class UmlClassModel {
 			if (association.getType().toString().equals("Inheritance")) {
 				sb.append("extends ");
 				sb.append(association.getTarget()).append(" ");
-			}			
+			}
+			if(association.getType().toString().equals("Aggregation")){
+				sb.append("aggregate of ");
+				sb.append(association.getTarget()).append(" ");
+			}
+			if(association.getType().toString().equals("Dependency")){
+				sb.append("dependent of ");
+				sb.append(association.getTarget()).append(" ");
+			}
 		}
 			
 		sb.append(" {\n"); 
