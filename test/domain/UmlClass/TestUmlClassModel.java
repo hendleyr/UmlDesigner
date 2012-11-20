@@ -272,17 +272,17 @@ public class TestUmlClassModel{
 		//Test 10: class with an aggregation association
 		testClass10b.addAssociation("AggregationTestClass", AssociationType.Aggregation);
 		String codeSkel10 = testClass10b.toString();
-		assertEquals("public class AggregateObjects aggregate of AggregationTestClass  {\n\n}\n", codeSkel10);
+		assertEquals("public class AggregateObjects  \n\n\tAggregationTestClass aggObject;{\n\n}\n", codeSkel10);
 		
 		//Test 11: class with a dependency association
 		testClass11b.addAssociation("DependedOnClass", AssociationType.Dependency);
 		String codeSkel11 = testClass11b.toString();
-		assertEquals("public class DependedOnClass dependent of DependedOnClass  {\n\n}\n", codeSkel11);
+		assertEquals("public class DependedOnClass  dependent of DependedOnClass  {\n{\n\n}\n", codeSkel11);
 		
 		//Test 12: class that inherits from another class
 		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Inheritance);
 		String codeSkel12 = testClass12b.toString();
-		assertEquals("public class InheritedClassTest extends InheritedFromTestClass  {\n\n}\n", codeSkel12);
+		assertEquals("public class InheritedClassTest  extends InheritedFromTestClass  {\n{\n\n}\n", codeSkel12);
 		
 		//Test 13: a class with both a method and an attribute
 		testClass13.addAttribute(testAttribute13);

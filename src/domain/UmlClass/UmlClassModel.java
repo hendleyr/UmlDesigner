@@ -185,7 +185,7 @@ public class UmlClassModel {
 			sb.append("class ");
 		}
 		
-		sb.append(getName()).append("  {");
+		sb.append(getName()).append("  ");
 
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().toString().equals("Inheritance")) {
@@ -202,7 +202,7 @@ public class UmlClassModel {
 			}
 		}
 			
-		sb.append("\n"); 
+		sb.append("{\n"); 
 		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
