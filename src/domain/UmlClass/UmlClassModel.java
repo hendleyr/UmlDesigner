@@ -185,24 +185,24 @@ public class UmlClassModel {
 			sb.append("class ");
 		}
 		
-		sb.append(getName()).append(" ");
+		sb.append(getName()).append("  {");
 
 		for (UmlAssociationModel association : _associations) {
 			if (association.getType().toString().equals("Inheritance")) {
 				sb.append("extends ");
-				sb.append(association.getTarget()).append(" ");
+				sb.append(association.getTarget()).append("  {\n");
 			}
 			if(association.getType().toString().equals("Aggregation")){
-				sb.append("aggregate of ");
-				sb.append(association.getTarget()).append(" ");
+				sb.append("\n\n\t");
+				sb.append(association.getTarget()).append(" aggObject;");
 			}
 			if(association.getType().toString().equals("Dependency")){
 				sb.append("dependent of ");
-				sb.append(association.getTarget()).append(" ");
+				sb.append(association.getTarget()).append("  {\n");
 			}
 		}
 			
-		sb.append(" {\n"); 
+		sb.append("\n"); 
 		
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
