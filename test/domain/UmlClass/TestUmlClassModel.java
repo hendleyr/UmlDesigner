@@ -269,12 +269,12 @@ public class TestUmlClassModel{
 		String codeSkel9 = testClass9.toString();
 		assertEquals("public class StaticAttributeTest  {\n\tprivate static String testAttribute2;\n\n}\n", codeSkel9);
 		
-		//TODO: Test 10: class with an aggregation association
+		//Test 10: class with an aggregation association
 		testClass10b.addAssociation("AggregationTestClass", AssociationType.Aggregation);
 		String codeSkel10 = testClass10b.toString();
-		assertEquals("public class AggregateObjects  {\n\n\tAggregationTestClass aggObject;\n\n}\n", codeSkel10);
+		assertEquals("public class AggregateObjects aggregate of AggregationTestClass  {\n\n}\n", codeSkel10);
 		
-		//TODO: Test 11: class with a dependency association
+		//Test 11: class with a dependency association
 		testClass11b.addAssociation("DependedOnClass", AssociationType.Dependency);
 		String codeSkel11 = testClass11b.toString();
 		assertEquals("public class DependedOnClass dependent of DependedOnClass  {\n\n}\n", codeSkel11);
