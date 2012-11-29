@@ -217,78 +217,78 @@ public class TestUmlClassModel{
 		
 		//Test 1a: blank public class (with default name)
 		String codeSkel1a = testClass1a.toString();
-		assertEquals("public class newClass  {\n\n}\n", codeSkel1a);
+		assertEquals("public class newClass {\n\n}\n", codeSkel1a);
 		
 		//Test 1b: blank private class (with custom name)
 		String codeSkel1b = testClass1b.toString();
-		assertEquals("private class CustomClassTest  {\n\n}\n", codeSkel1b);
+		assertEquals("private class CustomClassTest {\n\n}\n", codeSkel1b);
 		
 		//Test 2: default abstract class
 		testClass2.setAbstractFlag(true);
 		String codeSkel2 = testClass2.toString();
-		assertEquals("public abstract class AbstractClassTest  {\n\n}\n", codeSkel2);
+		assertEquals("public abstract class AbstractClassTest {\n\n}\n", codeSkel2);
 		
 		//Test 3: default interface
 		testClass3.setInterfaceFlag(true);
 		String codeSkel3 = testClass3.toString();
-		assertEquals("public interface InterfaceTest  {\n\n}\n", codeSkel3);
+		assertEquals("public interface InterfaceTest {\n\n}\n", codeSkel3);
 		
 		//Test 4: class with a non-static, non-abstract method
 		testClass4.addMethod(testMethod4);
 		String codeSkel4 = testClass4.toString();
-		assertEquals("public class PlainMethodTest  {\n\n\tprivate void plainMethod () {\n\n\t}\n}\n", codeSkel4);
+		assertEquals("public class PlainMethodTest {\n\n\tprivate void plainMethod () {\n\n\t}\n}\n", codeSkel4);
 		
 		//Test 5: class with a method with a parameter
 		testAttributeList5.add(testAttribute5);
 		testMethod5.setParameters(testAttributeList5);
 		testClass5.addMethod(testMethod5);
 		String codeSkel5 = testClass5.toString();
-		assertEquals("public class MethodWithParamTest  {\n\n\tprivate void methodWithParam (void testParameter) {\n\n\t}\n}\n", codeSkel5);
+		assertEquals("public class MethodWithParamTest {\n\n\tprivate void methodWithParam (void testParameter) {\n\n\t}\n}\n", codeSkel5);
 		
 		//Test 6: class with a static method
 		testMethod6.setStaticFlag(true);
 		testClass6.addMethod(testMethod6);
 		String codeSkel6 = testClass6.toString();
-		assertEquals("public class StaticMethodTest  {\n\n\tprivate static void staticMethod () {\n\n\t}\n}\n", codeSkel6);
+		assertEquals("public class StaticMethodTest {\n\n\tprivate static void staticMethod () {\n\n\t}\n}\n", codeSkel6);
 		
 		//Test 7: class with an abstract method
 		testMethod7.setAbstractFlag(true);
 		testClass7.addMethod(testMethod7);
 		String codeSkel7 = testClass7.toString();
-		assertEquals("public class AbstractMethodTest  {\n\n\tprivate abstract void abstractMethod () {\n\n\t}\n}\n", codeSkel7);
+		assertEquals("public class AbstractMethodTest {\n\n\tprivate abstract void abstractMethod () {\n\n\t}\n}\n", codeSkel7);
 		
 		//Test 8: class with a non-static attribute
 		testAttribute8.setStaticFlag(false);
 		testClass8.addAttribute(testAttribute8);
 		String codeSkel8 = testClass8.toString();
-		assertEquals("public class NonStaticAttributeTest  {\n\tprivate String testAttribute;\n\n}\n", codeSkel8);
+		assertEquals("public class NonStaticAttributeTest {\n\tprivate String testAttribute;\n\n}\n", codeSkel8);
 		
 		//Test 9: class with a static attribute
 		testAttribute9.setStaticFlag(true);
 		testClass9.addAttribute(testAttribute9);
 		String codeSkel9 = testClass9.toString();
-		assertEquals("public class StaticAttributeTest  {\n\tprivate static String testAttribute2;\n\n}\n", codeSkel9);
+		assertEquals("public class StaticAttributeTest {\n\tprivate static String testAttribute2;\n\n}\n", codeSkel9);
 		
 		//Test 10: class with an aggregation association
 		testClass10b.addAssociation("AggregationTestClass", AssociationType.Aggregation);
 		String codeSkel10 = testClass10b.toString();
-		assertEquals("public class AggregateObjects  \n\n\tAggregationTestClass aggObject;{\n\n}\n", codeSkel10);
+		assertEquals("public class AggregateObjects {\n\n\tAggregationTestClass aggObject;\n\n}\n", codeSkel10);
 		
 		//Test 11: class with a dependency association
 		testClass11b.addAssociation("DependedOnClass", AssociationType.Dependency);
 		String codeSkel11 = testClass11b.toString();
-		assertEquals("public class DependedOnClass  dependent of DependedOnClass  {\n{\n\n}\n", codeSkel11);
+		assertEquals("public class DependedOnClass dependent of DependedOnClass  {\n\n}\n", codeSkel11);
 		
 		//Test 12: class that inherits from another class
 		testClass12b.addAssociation("InheritedFromTestClass", AssociationType.Inheritance);
 		String codeSkel12 = testClass12b.toString();
-		assertEquals("public class InheritedClassTest  extends InheritedFromTestClass  {\n{\n\n}\n", codeSkel12);
+		assertEquals("public class InheritedClassTest extends InheritedFromTestClass  {\n\n}\n", codeSkel12);
 		
 		//Test 13: a class with both a method and an attribute
 		testClass13.addAttribute(testAttribute13);
 		testClass13.addMethod(testMethod13);
 		String codeSkel13 = testClass13.toString();
-		assertEquals("public class MethodWithAttrTest  {\n\tprivate String testAttribute13;\n\n" +
+		assertEquals("public class MethodWithAttrTest {\n\tprivate String testAttribute13;\n\n" +
 				"\tprivate void methodWithAttr () {\n\n\t}\n}\n", codeSkel13);
 	}
 }

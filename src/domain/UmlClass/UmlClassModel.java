@@ -9,8 +9,8 @@ public class UmlClassModel {
 	private List<UmlAssociationModel> _associations;
 	private List<UmlAttributeModel> _attributes;
 	private List<UmlMethodModel> _methods;
-	private boolean _isAbstract; 	
-	private boolean _isInterface; 	
+	private boolean _isAbstract;
+	private boolean _isInterface;
 
 	public UmlClassModel() {
 		this(AccessModifier.Public, "newClass");
@@ -26,25 +26,29 @@ public class UmlClassModel {
 
 	public UmlAssociationModel addAssociation(String assocTarget,
 			AssociationType associationType) {
-		if (assocTarget == null || associationType == null) return null;
+		if (assocTarget == null || associationType == null)
+			return null;
 		// if associations set includes a UmlAssociationModel with SAME target
 		// and a
 		// DIFFERENT associationType, throw exception
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().equals(assocTarget) && !association.getType().equals(associationType)) {
+			if (association.getTarget().equals(assocTarget)
+					&& !association.getType().equals(associationType)) {
 				return null;
 			}
 		}
 
 		// do nothing if association already exists
 		for (UmlAssociationModel association : _associations) {
-			if (association.getTarget().equals(assocTarget) && association.getType().equals(associationType)) {
+			if (association.getTarget().equals(assocTarget)
+					&& association.getType().equals(associationType)) {
 				return null;
 			}
 		}
 
 		// add new UmlAssociationModel
-		UmlAssociationModel newAssociationModel = new UmlAssociationModel(assocTarget, associationType);
+		UmlAssociationModel newAssociationModel = new UmlAssociationModel(
+				assocTarget, associationType);
 		_associations.add(newAssociationModel);
 		return newAssociationModel;
 	}
@@ -54,7 +58,8 @@ public class UmlClassModel {
 		// exception
 		for (UmlAssociationModel associationA : _associations) {
 			for (UmlAssociationModel associationB : _associations) {
-				if (associationA.getTarget().equals(associationB.getTarget()) && !associationA.equals(associationB)) {
+				if (associationA.getTarget().equals(associationB.getTarget())
+						&& !associationA.equals(associationB)) {
 					return null;
 				}
 			}
@@ -170,76 +175,78 @@ public class UmlClassModel {
 	}
 
 	// code skeleton
-	public String toString(){
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
-			
+
 		sb.append(getAccessModifier().toString().toLowerCase()).append(" ");
-		
+
 		if (getInterfaceFlag()) {
 			sb.append("interface ");
-		}
-		else if (getAbstractFlag()) {
+		} else if (getAbstractFlag()) {
 			sb.append("abstract class ");
-		}
-		else {
+		} else {
 			sb.append("class ");
 		}
-		
-		sb.append(getName()).append("  ");
 
-		for (UmlAssociationModel association : _associations) {
-			if (association.getType().toString().equals("Inheritance")) {
-				sb.append("extends ");
-				sb.append(association.getTarget()).append("  {\n");
-			}
-			if(association.getType().toString().equals("Aggregation")){
-				sb.append("\n\n\t");
-				sb.append(association.getTarget()).append(" aggObject;");
-			}
-			if(association.getType().toString().equals("Dependency")){
-				sb.append("dependent of ");
-				sb.append(association.getTarget()).append("  {\n");
+		sb.append(getName());
+
+		if (_associations.isEmpty()) {
+			sb.append(" {");
+		} else {
+			for (UmlAssociationModel association : _associations) {
+				if (association.getType().toString().equals("Inheritance")) {
+					sb.append(" extends ");
+					sb.append(association.getTarget()).append("  {");
+				}
+				if (association.getType().toString().equals("Aggregation")) {
+					sb.append(" {\n\n\t");
+					sb.append(association.getTarget()).append(" aggObject;");
+				}
+				if (association.getType().toString().equals("Dependency")) {
+					sb.append(" dependent of ");
+					sb.append(association.getTarget()).append("  {");
+				}
 			}
 		}
-			
-		sb.append("{\n"); 
-		
+
+		sb.append("\n");
+
 		for (UmlAttributeModel value : _attributes) {
 			sb.append("\t");
-			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
+			sb.append(value.getAccessModifier().toString().toLowerCase())
+					.append(" ");
 			if (value.getStaticFlag()) {
 				sb.append("static ");
 			}
 			sb.append(value.getType()).append(" ");
 			sb.append(value.getName()).append(";\n");
 		}
-		
+
 		sb.append("\n");
 
 		for (UmlMethodModel value : _methods) {
 			sb.append("\t");
-			sb.append(value.getAccessModifier().toString().toLowerCase()).append(" ");
-			
+			sb.append(value.getAccessModifier().toString().toLowerCase())
+					.append(" ");
+
 			if (value.getStaticFlag()) {
 				sb.append("static ");
-			}
-			else if (value.getAbstractFlag()) {
+			} else if (value.getAbstractFlag()) {
 				sb.append("abstract ");
 			}
-				
+
 			sb.append(value.getReturnType()).append(" ");
 			sb.append(value.getName()).append(" (");
-			for(int i = 0; i < value.getParameters().size(); ++ i) { 
-				if(i == value.getParameters().size() -1) {
-					sb.append(value.getParameters().get(i).getType() + " " + 
-				value.getParameters().get(i).getName());
-				}
-				else {
-					sb.append(value.getParameters().get(i).getType() + " " +
-				value.getParameters().get(i).getName() + ", ");
+			for (int i = 0; i < value.getParameters().size(); ++i) {
+				if (i == value.getParameters().size() - 1) {
+					sb.append(value.getParameters().get(i).getType() + " "
+							+ value.getParameters().get(i).getName());
+				} else {
+					sb.append(value.getParameters().get(i).getType() + " "
+							+ value.getParameters().get(i).getName() + ", ");
 				}
 			}
-			sb.append(") {"); 
+			sb.append(") {");
 			sb.append("\n\n\t}\n");
 		}
 		sb.append("}\n");
@@ -247,7 +254,6 @@ public class UmlClassModel {
 		String output = sb.toString();
 		return output;
 	}
-	
 
 	public AccessModifier getAccessModifier() {
 		return _accessModifier;
