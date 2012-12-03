@@ -165,6 +165,38 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 		        changed();
 			}
     	});
+    	actions.add(new AbstractAction(AssociationType.Association.toString()) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				willChange();
+				// change end decoration to no arrow
+				set(STROKE_DASHES, null);
+				
+				set(START_DECORATION, null);
+				if(isBidirectional) set(END_DECORATION, null);
+				else set(END_DECORATION, new ArrowTip());
+				associationModel.setType(AssociationType.Association);
+	        	changed();
+			}
+    	});
+    	actions.add(new AbstractAction(AssociationType.Implementation.toString()) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) {
+					willChange();
+					// change end decoration to white arrow
+					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, true, false, true));
+					set(STROKE_DASHES, DASH_PATTERN);					
+					associationModel.setType(AssociationType.Implementation);
+					
+					// destroy bidirectional
+					endFigure.getModel().removeAssociation(startFigure.getModel());
+					isBidirectional = false;
+					set(START_DECORATION, null);
+		        	changed();
+				}
+			}
+    	});
     	actions.add(new AbstractAction(AssociationType.Inheritance.toString()) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -196,31 +228,29 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	        	changed();
 			}
     	});
-    	actions.add(new AbstractAction(AssociationType.Association.toString()) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				willChange();
-				// change end decoration to no arrow
-				set(STROKE_DASHES, null);
-				set(END_DECORATION, null);
-				set(START_DECORATION, null);
-				associationModel.setType(AssociationType.Association);
-	        	changed();
-			}
-    	});
     	actions.add(new AbstractAction("Bidirectional") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				isBidirectional = !isBidirectional;
+				// don't allow setting to toggle if association is inheritance/implementation
+				if(associationModel.getType() != AssociationType.Inheritance && associationModel.getType() != AssociationType.Implementation) {
+					isBidirectional = !isBidirectional;
+				}				
 				// change start decoration to matching small arrow
-				if(associationModel.getType() != AssociationType.Inheritance && isBidirectional) {
+				if(isBidirectional) {
+					if (associationModel.getType() == AssociationType.Association) {
+						set(START_DECORATION, null);
+						set(END_DECORATION, null);
+					}
 					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
 					endFigure.getModel().addAssociation(startFigure.getModel().getName(), associationModel.getType());
 				}			
 				else {
 					set(START_DECORATION, null);
 					endFigure.getModel().removeAssociation(startFigure.getModel());
+					if (associationModel.getType() == AssociationType.Association) {
+						set(END_DECORATION, new ArrowTip());
+					}
 				}
 	        	changed();
 			}
