@@ -4,18 +4,21 @@ public class UmlAssociationModel {
 	private AssociationType _type;
 	private String _target;
 	private String _roleName;
+	private String _multiplicity;
 	
 	public UmlAssociationModel(String target, AssociationType type) {
 		_target = target;
 		_type = type;
 		_roleName = "";
+		_multiplicity = "";
 	}
 	
-	public UmlAssociationModel(String target, AssociationType type, String roleName) {
-		_target = target;
-		_type = type;
-		_roleName = roleName;
-	}
+//	public UmlAssociationModel(String target, AssociationType type, String roleName) {
+//		_target = target;
+//		_type = type;
+//		_roleName = roleName;
+//		_multiplicity = "";
+//	}
 
 	public AssociationType getType() {
 		return _type;
@@ -36,5 +39,13 @@ public class UmlAssociationModel {
 
 	public void setRoleName(String roleName) {
 		this._roleName = roleName;
+	}
+
+	public String getMultiplicity() {
+		return _multiplicity;
+	}
+
+	public void setMultiplicity(String _multiplicity) {
+		this._multiplicity = _multiplicity;
 	}
 }

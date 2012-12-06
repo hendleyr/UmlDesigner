@@ -19,9 +19,10 @@ public class ClassNameFigure extends TextFigure{
     
     @Override
     public void setText(String text) {
-    	// VERIFY AND MAP USER INPUT TO MODEL
-    	// remove the interface tag before examining the string
+    	// avoid some issues w/ factory
     	if (_classModel == null) return;
+    	// VERIFY AND MAP USER INPUT TO MODEL
+    	// remove the interface tag before examining the string    	
     	text = text.replace("<<interface>>\n", "");
     	
     	AccessModifier modelAccessModifier;

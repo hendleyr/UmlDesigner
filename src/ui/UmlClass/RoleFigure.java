@@ -17,6 +17,9 @@ public class RoleFigure extends TextFigure {
 	
 	@Override
 	public void setText(String text) {
+    	// avoid some issues w/ factory
+    	if (_assocModel == null) return;
+    	
 		_assocModel.setRoleName(text);
 		super.setText(text);
 	}

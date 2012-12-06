@@ -28,13 +28,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	// layout thoughts: multiplicities above the line near the arrow, roles below the line near the arrow,
 	//					relationship above the line centered horizontally
 	
-	private TextFigure startMultiplicity;
-	private TextFigure endMultiplicity;
+	private MultiplicityFigure sMult;
+	private MultiplicityFigure eMult;
 	
 	private TextFigure relationship;
 	
-	private TextFigure startRole;
-	private TextFigure endRole;
+	private RoleFigure startRole;
+	private RoleFigure endRole;
 	
 	private UmlAssociationModel associationModel;
 	private UmlClassFigure startFigure;
@@ -58,25 +58,25 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
         setAttributeEnabled(START_DECORATION, true);
         setAttributeEnabled(STROKE_DASHES, true);
         
-        // roles will become RoleFigure objects, probably move instantiation to handleConnect()
+        // TODO: move instantiation of role/multiplicities to handleConnect()/actions? private methods for changing association type?
         
-        startMultiplicity = new TextFigure("start mult");
-        startRole = new TextFigure("start role");
-        endMultiplicity = new TextFigure("end mult");
-        endRole = new TextFigure("end role");
+        sMult = new MultiplicityFigure("1", associationModel);
+        startRole = new RoleFigure("start role", associationModel);
+        eMult = new MultiplicityFigure("1", associationModel);
+        endRole = new RoleFigure("end role", associationModel);
         relationship = new TextFigure("relationship");
         // TODO: these layouts are ALL messed up; but it's a start/proof of concept i guess
         // maybe we want to try a DIFFERENT layouter
         setLayouter(new LocatorLayouter());
-        startMultiplicity.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, Math.PI / 4, 2));
+        sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, Math.PI / 4, 2));
         startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, -Math.PI / 4, 2));
-        endMultiplicity.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, Math.PI / 4, 2));
+        eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, Math.PI / 4, 2));
         endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, -Math.PI / 4, 2));
         relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.5, -Math.PI / 4, 0));
         
-        add(startMultiplicity);
+        add(sMult);
         add(startRole);
-        add(endMultiplicity);
+        add(eMult);
         add(endRole);
         add(relationship);        
     }
