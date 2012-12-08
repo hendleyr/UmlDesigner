@@ -5,6 +5,7 @@ import org.jhotdraw.draw.decoration.ArrowTip;
 import org.jhotdraw.draw.layouter.LocatorLayouter;
 import org.jhotdraw.draw.liner.ElbowLiner;
 import org.jhotdraw.draw.locator.BezierLabelLocator;
+import org.jhotdraw.draw.locator.BezierPointLocator;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -65,14 +66,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
         eMult = new MultiplicityFigure("1", associationModel);
         endRole = new RoleFigure("end role", associationModel);
         relationship = new TextFigure("relationship");
-        // TODO: these layouts are ALL messed up; but it's a start/proof of concept i guess
-        // maybe we want to try a DIFFERENT layouter
+        
         setLayouter(new LocatorLayouter());
-        sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, Math.PI / 4, 2));
-        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.2, -Math.PI / 4, 2));
-        eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, Math.PI / 4, 2));
-        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(1, -Math.PI / 4, 2));
-        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new BezierLabelLocator(0.5, -Math.PI / 4, 0));
+        sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
+        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
+        eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
+        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
+        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
         
         add(sMult);
         add(startRole);
