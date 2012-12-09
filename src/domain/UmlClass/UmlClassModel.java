@@ -52,6 +52,64 @@ public class UmlClassModel {
 		_associations.add(newAssociationModel);
 		return newAssociationModel;
 	}
+	
+	public UmlAssociationModel addAssociation(String assocTarget,
+			AssociationType associationType, String roleName) {
+		if (assocTarget == null || associationType == null)
+			return null;
+		// if associations set includes a UmlAssociationModel with SAME target
+		// and a
+		// DIFFERENT associationType, throw exception
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assocTarget)
+					&& !association.getType().equals(associationType)) {
+				return null;
+			}
+		}
+
+		// do nothing if association already exists
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assocTarget)
+					&& association.getType().equals(associationType)) {
+				return null;
+			}
+		}
+
+		// add new UmlAssociationModel
+		UmlAssociationModel newAssociationModel = new UmlAssociationModel(
+				assocTarget, associationType, roleName);
+		_associations.add(newAssociationModel);
+		return newAssociationModel;
+	}
+	
+	public UmlAssociationModel addAssociation(String assocTarget,
+			AssociationType associationType, String roleName, String multName) {
+		if (assocTarget == null || associationType == null)
+			return null;
+		// if associations set includes a UmlAssociationModel with SAME target
+		// and a
+		// DIFFERENT associationType, throw exception
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assocTarget)
+					&& !association.getType().equals(associationType)) {
+				return null;
+			}
+		}
+
+		// do nothing if association already exists
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assocTarget)
+					&& association.getType().equals(associationType)) {
+				return null;
+			}
+		}
+
+		// add new UmlAssociationModel
+		UmlAssociationModel newAssociationModel = new UmlAssociationModel(
+				assocTarget, associationType, roleName, multName);
+		_associations.add(newAssociationModel);
+		return newAssociationModel;
+	}
 
 	public UmlAssociationModel removeAssociation(UmlClassModel target) {
 		// if multiple tuples in association set have this target, throw

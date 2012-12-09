@@ -130,7 +130,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     public int getLayer() {
         return 1;
     }
-
+    
     @Override
     public Collection<Action> getActions(Point2D.Double p) {
     	Collection<Action> actions = new ArrayList<Action>();

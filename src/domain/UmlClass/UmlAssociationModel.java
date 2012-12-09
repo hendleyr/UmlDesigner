@@ -13,12 +13,19 @@ public class UmlAssociationModel {
 		_multiplicity = "";
 	}
 	
-//	public UmlAssociationModel(String target, AssociationType type, String roleName) {
-//		_target = target;
-//		_type = type;
-//		_roleName = roleName;
-//		_multiplicity = "";
-//	}
+	public UmlAssociationModel(String target, AssociationType type, String roleName) {
+		_target = target;
+		_type = type;
+		_roleName = roleName;
+		_multiplicity = "";
+	}
+	
+	public UmlAssociationModel(String target, AssociationType type, String roleName, String multiplicity) {
+		_target = target;
+		_type = type;
+		_roleName = roleName;
+		_multiplicity = multiplicity;
+	}
 
 	public AssociationType getType() {
 		return _type;

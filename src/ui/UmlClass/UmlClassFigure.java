@@ -180,6 +180,18 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			        	out.openElement("assocTarget");
 			        		out.addText(assoc.getTarget());
 			        	out.closeElement();
+			        	
+			        	if(assoc.getType() == AssociationType.Aggregation || assoc.getType() == AssociationType.Association){
+			        		out.openElement("assocRole");
+			        			out.addText(assoc.getRoleName());
+			        		out.closeElement();
+			        	}
+			        	
+			        	if(assoc.getType() == AssociationType.Association) {
+			        		out.openElement("assocMult");
+			        			out.addText(assoc.getMultiplicity());
+			        		out.closeElement();
+			        	}
 		        	out.closeElement();
 		        }
 	        out.closeElement();
@@ -278,17 +290,38 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 			        		String assocText = in.getText();
 			        		AssociationType assocType;	// work-around for recurring enum issue...
 			        		if (assocText.equals("Inheritance")) assocType = AssociationType.Inheritance;
-			        		else if (assocText.equals("Implementation")) assocType = AssociationType.Inheritance;
-			        		else if (assocText.equals("Aggregation")) assocType = AssociationType.Inheritance;
-			        		else if (assocText.equals("Composition")) assocType = AssociationType.Inheritance;
-			        		else if (assocText.equals("Dependency")) assocType = AssociationType.Inheritance;
-			        		else assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Implementation")) assocType = AssociationType.Implementation;
+			        		else if (assocText.equals("Aggregation")) assocType = AssociationType.Aggregation;
+			        		else if (assocText.equals("Composition")) assocType = AssociationType.Composition;
+			        		else if (assocText.equals("Dependency")) assocType = AssociationType.Dependency;
+			        		else assocType = AssociationType.Association;
 			        	in.closeElement();
 			        	in.openElement("assocTarget");
 			        		String assocTarget = in.getText();
 			        	in.closeElement();
+			        	String assocRole = "";
+			        	String assocMult = "";
+			        	if (assocType == AssociationType.Aggregation || assocType == AssociationType.Association){
+			        		in.openElement("assocRole");
+			        			assocRole = in.getText();
+			        		in.closeElement();
+			        	}
+			        	if (assocType == AssociationType.Association){
+			        		in.openElement("assocMult");
+			        			assocMult = in.getText();
+			        		in.closeElement();
+			        	}
+			        	
 		        	in.closeElement();
-		        	getModel().addAssociation(assocTarget, assocType);
+		        	if (assocType == AssociationType.Association){
+		        		getModel().addAssociation(assocTarget, assocType, assocRole, assocMult);
+		        	}
+		        	else if (assocType == AssociationType.Aggregation){
+		        		getModel().addAssociation(assocTarget, assocType, assocRole);
+		        	}
+		        	else {
+		        		getModel().addAssociation(assocTarget, assocType);
+		        	}
 	        	}
 	        in.closeElement();
 	        
