@@ -24,6 +24,32 @@ public class UmlClassModel {
 		_methods = new ArrayList<UmlMethodModel>();
 	}
 
+	public UmlAssociationModel addAssociation(UmlAssociationModel assoc) {
+		if (assoc.getTarget() == null || assoc.getType() == null)
+			return null;
+		// if associations set includes a UmlAssociationModel with SAME target
+		// and a
+		// DIFFERENT associationType, throw exception
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assoc.getTarget())
+					&& !association.getType().equals(assoc.getType())) {
+				return null;
+			}
+		}
+
+		// do nothing if association already exists
+		for (UmlAssociationModel association : _associations) {
+			if (association.getTarget().equals(assoc.getTarget())
+					&& association.getType().equals(assoc.getType())) {
+				return null;
+			}
+		}
+
+		// add new UmlAssociationModel
+		_associations.add(assoc);
+		return assoc;
+	}
+	
 	public UmlAssociationModel addAssociation(String assocTarget,
 			AssociationType associationType) {
 		if (assocTarget == null || associationType == null)

@@ -10,6 +10,7 @@ import org.jhotdraw.draw.locator.BezierPointLocator;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -18,6 +19,8 @@ import javax.swing.Action;
 
 import static org.jhotdraw.draw.AttributeKeys.*;
 import org.jhotdraw.draw.*;
+import org.jhotdraw.xml.DOMInput;
+import org.jhotdraw.xml.DOMOutput;
 
 import domain.UmlClass.AssociationType;
 import domain.UmlClass.UmlAssociationModel;
@@ -38,6 +41,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	private RoleFigure endRole;
 	
 	private UmlAssociationModel associationModel;
+	private UmlAssociationModel bidirectionalAssocModel;
 	private UmlClassFigure startFigure;
 	private UmlClassFigure endFigure;
 	boolean isBidirectional;
@@ -45,6 +49,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     /** Creates a new instance. */
     public AssociationFigure() {
     	associationModel = new UmlAssociationModel(null, AssociationType.Dependency);
+    	bidirectionalAssocModel = new UmlAssociationModel(null, AssociationType.Dependency);
     	isBidirectional = false;
     	setLiner(new ElbowLiner());
     	
@@ -111,8 +116,14 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     	UmlClassFigure ef = (UmlClassFigure) end.getOwner();
 
     	associationModel.setTarget(ef.getModel().getName());
-        sf.getModel().addAssociation(ef.getModel().getName(), associationModel.getType());
-        if (isBidirectional) ef.getModel().addAssociation(sf.getModel().getName(), associationModel.getType());
+    	sf.getModel().addAssociation(associationModel);
+    	if (isBidirectional) {
+    		bidirectionalAssocModel = new UmlAssociationModel(sf.getModel().getName(), associationModel.getType(), 
+    				endRole.getText(), eMult.getText());
+    		ef.getModel().addAssociation(bidirectionalAssocModel);
+    	}
+        //sf.getModel().addAssociation(ef.getModel().getName(), associationModel.getType());
+        //if (isBidirectional) ef.getModel().addAssociation(sf.getModel().getName(), associationModel.getType());
         
         // store an internal reference to class figures for use in actions later
         startFigure = sf;
@@ -143,8 +154,6 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				set(END_DECORATION, new ArrowTip(1, 20.0 , 20.0, false, true, true));
 				associationModel.setType(AssociationType.Aggregation);
 				
-				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
-
 				//destroy any existing multiplicities/roles/relationships
 		        remove(sMult);
 		        remove(startRole);
@@ -153,7 +162,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 		        remove(relationship);
 		        
 		        startRole = new RoleFigure("start role", associationModel);
-		        endRole = new RoleFigure("end role", associationModel);
+		        endRole = new RoleFigure("end role", bidirectionalAssocModel);
 		        relationship = new TextFigure("relationship");
 		      
 		        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
@@ -163,6 +172,14 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 		        add(startRole);
 		        add(endRole);
 		        add(relationship);
+		        
+				if(isBidirectional) {
+					bidirectionalAssocModel.setType(associationModel.getType());
+					bidirectionalAssocModel.setRoleName(endRole.getText());
+					bidirectionalAssocModel.setMultiplicity(null);
+					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				}
+		        
 		        changed();
 			}
     	});
@@ -172,10 +189,8 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				willChange();
 				// change end decoration to no arrow
 				set(STROKE_DASHES, null);
-				
 				set(START_DECORATION, null);
-				if(isBidirectional) set(END_DECORATION, null);
-				else set(END_DECORATION, new ArrowTip());
+				
 				associationModel.setType(AssociationType.Association);
 				
 				//destroy any existing multiplicities/roles/relationships
@@ -188,7 +203,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	            sMult = new MultiplicityFigure("1", associationModel);
 	            startRole = new RoleFigure("start role", associationModel);
 	            eMult = new MultiplicityFigure("1", associationModel);
-	            endRole = new RoleFigure("end role", associationModel);
+	            endRole = new RoleFigure("end role", bidirectionalAssocModel);
 	            relationship = new TextFigure("relationship");
 	          
 	            sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
@@ -202,6 +217,15 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 	            add(eMult);
 	            add(endRole);
 	            add(relationship);
+	            
+	            if(isBidirectional) {
+					bidirectionalAssocModel.setType(associationModel.getType());
+					bidirectionalAssocModel.setRoleName(endRole.getText());
+					bidirectionalAssocModel.setMultiplicity(eMult.getText());
+					set(END_DECORATION, null);
+				}
+				else set(END_DECORATION, new ArrowTip());
+	            
 	        	changed();       	
 			}
     	});
@@ -264,7 +288,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				set(END_DECORATION, new ArrowTip());
 				associationModel.setType(AssociationType.Dependency);
 				
-				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				if(isBidirectional) {
+					bidirectionalAssocModel.setType(null);
+					bidirectionalAssocModel.setRoleName(null);
+					bidirectionalAssocModel.setMultiplicity(null);
+					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				}
+				else set(END_DECORATION, new ArrowTip());
 				
 				//destroy any existing multiplicities/roles/relationships
 		        remove(sMult);
@@ -285,12 +315,17 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				}				
 				// change start decoration to matching small arrow
 				if(isBidirectional) {
+					bidirectionalAssocModel = new UmlAssociationModel(startFigure.getModel().getName(), associationModel.getType());
 					if (associationModel.getType() == AssociationType.Association) {
 						set(START_DECORATION, null);
 						set(END_DECORATION, null);
 					}
+					if (eMult != null)
+						bidirectionalAssocModel.setMultiplicity(eMult.getText());
+					if (endRole != null)
+						bidirectionalAssocModel.setRoleName(endRole.getText());
 					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
-					endFigure.getModel().addAssociation(startFigure.getModel().getName(), associationModel.getType());
+					endFigure.getModel().addAssociation(bidirectionalAssocModel);
 				}			
 				else {
 					set(START_DECORATION, null);
@@ -304,4 +339,14 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     	});
     	return actions;
     }
+    
+//    @Override
+//    public void read(DOMInput in) throws IOException {
+//    	
+//    }
+//    
+//    @Override
+//    public void write(DOMOutput out) throws IOException {
+//    	
+//    }
 }
