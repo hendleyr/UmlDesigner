@@ -59,26 +59,8 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
         setAttributeEnabled(START_DECORATION, true);
         setAttributeEnabled(STROKE_DASHES, true);
         
-        // TODO: move instantiation of role/multiplicities to handleConnect()/actions? private methods for changing association type?
-        
-        sMult = new MultiplicityFigure("1", associationModel);
-        startRole = new RoleFigure("start role", associationModel);
-        eMult = new MultiplicityFigure("1", associationModel);
-        endRole = new RoleFigure("end role", associationModel);
-        relationship = new TextFigure("relationship");
-        
+        // TODO: move instantiation of role/multiplicities to handleConnect()/actions? private methods for changing association type?     
         setLayouter(new LocatorLayouter());
-        sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
-        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
-        eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
-        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
-        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
-        
-        add(sMult);
-        add(startRole);
-        add(eMult);
-        add(endRole);
-        add(relationship);        
     }
 
     /**
@@ -162,6 +144,25 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				associationModel.setType(AssociationType.Aggregation);
 				
 				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+
+				//destroy any existing multiplicities/roles/relationships
+		        remove(sMult);
+		        remove(startRole);
+		        remove(eMult);
+		        remove(endRole);
+		        remove(relationship);
+		        
+		        startRole = new RoleFigure("start role", associationModel);
+		        endRole = new RoleFigure("end role", associationModel);
+		        relationship = new TextFigure("relationship");
+		      
+		        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
+		        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
+		        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
+		        
+		        add(startRole);
+		        add(endRole);
+		        add(relationship);
 		        changed();
 			}
     	});
@@ -176,7 +177,32 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				if(isBidirectional) set(END_DECORATION, null);
 				else set(END_DECORATION, new ArrowTip());
 				associationModel.setType(AssociationType.Association);
-	        	changed();
+				
+				//destroy any existing multiplicities/roles/relationships
+		        remove(sMult);
+		        remove(startRole);
+		        remove(eMult);
+		        remove(endRole);
+		        remove(relationship);
+		        
+	            sMult = new MultiplicityFigure("1", associationModel);
+	            startRole = new RoleFigure("start role", associationModel);
+	            eMult = new MultiplicityFigure("1", associationModel);
+	            endRole = new RoleFigure("end role", associationModel);
+	            relationship = new TextFigure("relationship");
+	          
+	            sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
+	            startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
+	            eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
+	            endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
+	            relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
+	            
+	            add(sMult);
+	            add(startRole);
+	            add(eMult);
+	            add(endRole);
+	            add(relationship);
+	        	changed();       	
 			}
     	});
     	actions.add(new AbstractAction(AssociationType.Implementation.toString()) {
@@ -193,6 +219,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 					endFigure.getModel().removeAssociation(startFigure.getModel());
 					isBidirectional = false;
 					set(START_DECORATION, null);
+					
+					//destroy any existing multiplicities/roles/relationships
+			        remove(sMult);
+			        remove(startRole);
+			        remove(eMult);
+			        remove(endRole);
+			        remove(relationship);
 		        	changed();
 				}
 			}
@@ -211,6 +244,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 					endFigure.getModel().removeAssociation(startFigure.getModel());
 					isBidirectional = false;
 					set(START_DECORATION, null);
+					
+					//destroy any existing multiplicities/roles/relationships
+			        remove(sMult);
+			        remove(startRole);
+			        remove(eMult);
+			        remove(endRole);
+			        remove(relationship);
 		        	changed();
 				}
 			}
@@ -225,6 +265,13 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
 				associationModel.setType(AssociationType.Dependency);
 				
 				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				
+				//destroy any existing multiplicities/roles/relationships
+		        remove(sMult);
+		        remove(startRole);
+		        remove(eMult);
+		        remove(endRole);
+		        remove(relationship);
 	        	changed();
 			}
     	});

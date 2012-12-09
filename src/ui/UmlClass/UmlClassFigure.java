@@ -396,6 +396,10 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 				// if is interface, abstract is redundant
 				if (model.getInterfaceFlag()) {
 					model.setAbstractFlag(false);
+					for (UmlMethodModel method : model.getMethods()){
+						method.setStaticFlag(false);
+						method.setAbstractFlag(false);
+					}
 					getNameFigure().set(AttributeKeys.FONT_ITALIC, false);
 				}
 				getNameFigure().setText(getNameFigure().getText());
