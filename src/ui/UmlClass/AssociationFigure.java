@@ -1,260 +1,471 @@
 package ui.UmlClass;
 
-import org.jhotdraw.draw.connector.Connector;
-import org.jhotdraw.draw.decoration.ArrowTip;
-import org.jhotdraw.draw.layouter.LocatorLayouter;
-import org.jhotdraw.draw.liner.ElbowLiner;
-import org.jhotdraw.draw.locator.BezierLabelLocator;
-import org.jhotdraw.draw.locator.BezierPointLocator;
+import static org.jhotdraw.draw.AttributeKeys.FILL_COLOR;
+import static org.jhotdraw.draw.AttributeKeys.STROKE_COLOR;
 
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import static org.jhotdraw.draw.AttributeKeys.*;
-import org.jhotdraw.draw.*;
+import org.jhotdraw.draw.AttributeKeys;
+import org.jhotdraw.draw.Figure;
+import org.jhotdraw.draw.GraphicalCompositeFigure;
+import org.jhotdraw.draw.ListFigure;
+import org.jhotdraw.draw.RectangleFigure;
+import javax.swing.AbstractAction;
+import org.jhotdraw.draw.layouter.VerticalLayouter;
+import org.jhotdraw.geom.Insets2D;
+import org.jhotdraw.samples.pert.figures.SeparatorLineFigure;
+import org.jhotdraw.xml.DOMInput;
+import org.jhotdraw.xml.DOMOutput;
 
+import domain.UmlClass.AccessModifier;
 import domain.UmlClass.AssociationType;
 import domain.UmlClass.UmlAssociationModel;
+import domain.UmlClass.UmlAttributeModel;
+import domain.UmlClass.UmlClassModel;
+import domain.UmlClass.UmlMethodModel;
 
 @SuppressWarnings("serial")
-public class AssociationFigure extends LabeledLineConnectionFigure {
-	private static final double[] DASH_PATTERN = new double[] {10};
-	
-	// layout thoughts: multiplicities above the line near the arrow, roles below the line near the arrow,
-	//					relationship above the line centered horizontally
-	
-	private MultiplicityFigure sMult;
-	private MultiplicityFigure eMult;
-	
-	private TextFigure relationship;
-	
-	private RoleFigure startRole;
-	private RoleFigure endRole;
-	
-	private UmlAssociationModel associationModel;
-	private UmlClassFigure startFigure;
-	private UmlClassFigure endFigure;
-	boolean isBidirectional;
-	
-    /** Creates a new instance. */
-    public AssociationFigure() {
-    	associationModel = new UmlAssociationModel(null, AssociationType.Dependency);
-    	isBidirectional = false;
-    	setLiner(new ElbowLiner());
-    	
-        set(STROKE_COLOR, new Color(0x000099));
-        set(AttributeKeys.FILL_COLOR, Color.WHITE);
-        set(STROKE_WIDTH, 1d);
-        set(STROKE_DASHES, DASH_PATTERN);
-        set(END_DECORATION, new ArrowTip());
+public class UmlClassFigure extends GraphicalCompositeFigure {    
+	private UmlClassModel model;	
+    public UmlClassModel getModel() {
+        return model;
+    }
+    protected void setModel(UmlClassModel newModel) {
+    	model = newModel;
+    }
+    
+    public UmlClassFigure() {
+        super(new RectangleFigure());
+        setModel(new UmlClassModel());
         
-        setAttributeEnabled(FILL_COLOR, true);
-        setAttributeEnabled(END_DECORATION, true);
-        setAttributeEnabled(START_DECORATION, true);
-        setAttributeEnabled(STROKE_DASHES, true);
+        setLayouter(new VerticalLayouter());
+        RectangleFigure nameCompartmentPF = new RectangleFigure();
+        nameCompartmentPF.set(STROKE_COLOR, null);
+        nameCompartmentPF.set(FILL_COLOR, null);
+        RectangleFigure attributesCompartmentPF = new RectangleFigure();
+        attributesCompartmentPF.set(STROKE_COLOR, null);
+        attributesCompartmentPF.set(FILL_COLOR, null);
+        RectangleFigure methodsCompartmentPF = new RectangleFigure();
+        methodsCompartmentPF.set(STROKE_COLOR, null);
+        methodsCompartmentPF.set(FILL_COLOR, null);
         
-        // TODO: move instantiation of role/multiplicities to handleConnect()/actions? private methods for changing association type?
-        
-        sMult = new MultiplicityFigure("1", associationModel);
-        startRole = new RoleFigure("start role", associationModel);
-        eMult = new MultiplicityFigure("1", associationModel);
-        endRole = new RoleFigure("end role", associationModel);
-        relationship = new TextFigure("relationship");
-        
-        setLayouter(new LocatorLayouter());
-        sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
-        startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
-        eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
-        endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
-        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
-        
-        add(sMult);
-        add(startRole);
-        add(eMult);
-        add(endRole);
-        add(relationship);        
+        ListFigure nameCompartment = new ListFigure(nameCompartmentPF); 			// child 0
+        SeparatorLineFigure separator1 = new SeparatorLineFigure();					// child 1
+        ListFigure attributesCompartment = new ListFigure(attributesCompartmentPF);	// child 2
+        SeparatorLineFigure separator2 = new SeparatorLineFigure();					// child 3
+        ListFigure methodsCompartment = new ListFigure(methodsCompartmentPF);		// child 4
+
+        add(nameCompartment);
+        add(separator1);
+        add(attributesCompartment);
+        add(separator2);
+        add(methodsCompartment);
+
+        Insets2D.Double insets = new Insets2D.Double(4, 8, 4, 8);
+        nameCompartment.set(LAYOUT_INSETS, insets);
+        attributesCompartment.set(LAYOUT_INSETS, insets);
+        methodsCompartment.set(LAYOUT_INSETS, insets);
+
+        // supply a default class name
+        ClassNameFigure classNameFigure = new ClassNameFigure("+ newClass", model);
+        nameCompartment.add(classNameFigure);
+    }
+    
+    protected ClassNameFigure getNameFigure() {
+    	ListFigure nameCompartment = (ListFigure) this.getChild(0);
+    	ClassNameFigure classNameFigure = (ClassNameFigure) nameCompartment.getChild(0);
+    	return classNameFigure;
+    }
+    protected ListFigure getAttributesCompartment() {
+    	ListFigure attributesCompartment = (ListFigure) this.getChild(2);
+    	return attributesCompartment;
+    }
+    
+    protected ListFigure getMethodsCompartment() {
+    	ListFigure methodsCompartment = (ListFigure) this.getChild(4);
+    	return methodsCompartment;
     }
 
+    //TODO: possibly remove these helpers
+	/**
+	 * @precondition	nameFigureCompartment has been initialized
+	 * @postcondition	nameFigure has been updated with info from model
+	 */
+    private void drawClass() {
+    	String className = getModel().getName();
+    	char classAccessMod = getModel().getAccessModifier().getSymbol();
+    	getNameFigure().setText(classAccessMod + " " + className);
+    }
+
+	/**
+	 * @precondition 	attributesCompartment has been initialized
+	 * @postcondition	new text figure has been added with info from model
+	 * @param 			attrModel	model info to display
+	 */
+    private void drawAttribute(UmlAttributeModel attrModel) {
+    	String attrFigureText = attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType();
+    	AttributeFigure attrFigure = new AttributeFigure(attrFigureText, model, attrModel);
+    	getAttributesCompartment().add(attrFigure);
+    }
+    
     /**
-     * Checks if two figures can be connected. Implement this method
-     * to constrain the allowed connections between figures.
-     */
-    @Override
-    public boolean canConnect(Connector start, Connector end) {
-    	if (start.getOwner().equals(end.getOwner())) return false;
-    	if ((start.getOwner() instanceof UmlClassFigure) && (end.getOwner() instanceof UmlClassFigure)) {
-    		UmlClassFigure sf = (UmlClassFigure) start.getOwner();
-    		UmlClassFigure ef = (UmlClassFigure) end.getOwner();
-    		
-    		if (associationModel.getType() == AssociationType.Inheritance) {
-    			if (sf.getModel().hasInheritanceCycle(ef.getModel())) return false;
-    		}
-    		
-    		return true;
+	 * @precondition 				methodsCompartment has been initialized
+	 * @postcondition				new text figure has been added with info from model
+	 * @param 			methodModel	model info to display
+	 */
+    private void drawMethod(UmlMethodModel methodModel) {
+    	String methodFigureText = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
+    	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
+    		if ( i == methodModel.getParameters().size() - 1)
+    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
+    		else
+    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
     	}
-        return false;
+    	methodFigureText += ") : " + methodModel.getReturnType();
+    	MethodFigure methodFigure = new MethodFigure(methodFigureText, model, methodModel, getNameFigure());
+    	getMethodsCompartment().add(methodFigure);
     }
-
+    
     @Override
-    public boolean canConnect(Connector start) {
-        return (start.getOwner() instanceof UmlClassFigure);
-    }
-
-    /**
-     * Handles the disconnection of a connection.
-     * Override this method to handle this event.
-     */
-    @Override
-    protected void handleDisconnect(Connector start, Connector end) {
-    	UmlClassFigure sf = (UmlClassFigure) start.getOwner();
-    	UmlClassFigure ef = (UmlClassFigure) end.getOwner();
-    	    	
-    	sf.getModel().removeAssociation(ef.getModel());
-    	if (isBidirectional) ef.getModel().removeAssociation(sf.getModel());
-    }
-
-    /**
-     * Handles the connection of a connection.
-     * Override this method to handle this event.
-     */
-    @Override
-    protected void handleConnect(Connector start, Connector end) {
-    	UmlClassFigure sf = (UmlClassFigure) start.getOwner();
-    	UmlClassFigure ef = (UmlClassFigure) end.getOwner();
-
-    	associationModel.setTarget(ef.getModel().getName());
-        sf.getModel().addAssociation(ef.getModel().getName(), associationModel.getType());
-        if (isBidirectional) ef.getModel().addAssociation(sf.getModel().getName(), associationModel.getType());
+    public UmlClassFigure clone() {
+    	// TODO: i'm not sure if this is correct...
+    	UmlClassFigure that = (UmlClassFigure) super.clone();
+    	that.setModel(new UmlClassModel());
         
-        // store an internal reference to class figures for use in actions later
-        startFigure = sf;
-        endFigure = ef;
-    }
-
-    @Override
-    public AssociationFigure clone() {
-    	AssociationFigure that = (AssociationFigure) super.clone();
-
+    	// work-around for model issue in the class name figure
+        ListFigure nameCompartment = (ListFigure)that.getChild(0);
+        nameCompartment.removeAllChildren();
+        ClassNameFigure classNameFigure = new ClassNameFigure("+ newClass", that.model);
+        nameCompartment.add(classNameFigure);
+        
         return that;
     }
-
+    
+    //TODO:update for refactoring changes
     @Override
-    public int getLayer() {
-        return 1;
+    public void write(DOMOutput out) throws IOException {
+        Rectangle2D.Double r = getBounds();
+        out.addAttribute("x", r.x);
+        out.addAttribute("y", r.y);
+        writeAttributes(out);
+        out.openElement("classModel");
+	    	out.addAttribute("classAbstractFlag", getModel().getAbstractFlag());
+	    	out.addAttribute("classInterfaceFlag", getModel().getInterfaceFlag());
+        
+        	out.openElement("classAccessModifier");
+        		out.addText("" + getModel().getAccessModifier().getSymbol());
+        	out.closeElement();
+        
+	        out.openElement("className");
+	        	out.addText(getModel().getName());
+	        out.closeElement();
+	        
+	        out.openElement("classAssociations");
+		        for(UmlAssociationModel assoc : getModel().getAssociations()) {
+		        	out.openElement("assoc");
+			        	out.openElement("assocType");
+			        		out.addText(assoc.getType().toString());
+			        	out.closeElement();
+			        	
+			        	out.openElement("assocTarget");
+			        		out.addText(assoc.getTarget());
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
+        
+	        out.openElement("classAttributes");
+		        for(UmlAttributeModel attr : getModel().getAttributes()) {
+		        	out.openElement("attr");
+		        		out.addAttribute("attrStaticFlag", attr.getStaticFlag());
+		        	
+			        	out.openElement("attrAccessModifier");
+			        		out.addText(""+attr.getAccessModifier().getSymbol());
+			        	out.closeElement();
+			        	
+			        	out.openElement("attrName");
+			        		out.addText(attr.getName());
+			        	out.closeElement();
+			        	
+			        	out.openElement("attrType");
+			        		out.addText(attr.getType());
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
+        
+	        out.openElement("methods");
+		        for(UmlMethodModel method : getModel().getMethods()) {
+		        	out.openElement("method");
+		        		out.addAttribute("methodAbstractFlag", method.getAbstractFlag());
+		        		out.addAttribute("methodStaticFlag", method.getStaticFlag());
+		        		
+			        	out.openElement("methodAccessModifier");
+			        		out.addText(""+method.getAccessModifier().getSymbol());
+			        	out.closeElement();
+			        	
+			        	out.openElement("methodType");
+			        		out.addText(method.getReturnType());
+			        	out.closeElement();
+			        	
+			        	out.openElement("methodName");
+			        		out.addText(method.getName());
+			        	out.closeElement();
+			        	
+			        	out.openElement("params");
+				        	for(UmlAttributeModel param : method.getParameters()) {
+				        		out.openElement("param");
+					        		out.openElement("paramType");
+					        			out.addText(param.getType());
+					        		out.closeElement();
+					        		
+					        		out.openElement("paramName");
+					        			out.addText(param.getName());
+					        		out.closeElement();
+				        		out.closeElement();
+				        	}
+			        	out.closeElement();
+		        	out.closeElement();
+		        }
+	        out.closeElement();
+	        
+        out.closeElement();
     }
 
     @Override
+    public void read(DOMInput in) throws IOException {
+    	this.willChange();
+    	// remove default text figures
+    	getAttributesCompartment().removeAllChildren();
+    	getMethodsCompartment().removeAllChildren();
+    	
+        double x = in.getAttribute("x", 0d);
+        double y = in.getAttribute("y", 0d);
+        double w = in.getAttribute("w", 0d);
+        double h = in.getAttribute("h", 0d);
+        setBounds(new Point2D.Double(x, y), new Point2D.Double(x + w, y + h));
+        readAttributes(in);
+        in.openElement("classModel");
+        	getModel().setAbstractFlag(in.getAttribute("classAbstractFlag", false));
+        	getModel().setInterfaceFlag(in.getAttribute("classInterfaceFlag", false));
+        	readAttributes(in);
+        
+	        in.openElement("classAccessModifier");
+	        	String classAccessMod = in.getText();	// workaround for enum issue
+	        	if (classAccessMod.equals("+")) getModel().setAccessModifier(AccessModifier.Public);
+	        	else if (classAccessMod.equals("-")) getModel().setAccessModifier(AccessModifier.Private);
+	        	else getModel().setAccessModifier(AccessModifier.Protected);
+	        in.closeElement();
+	        in.openElement("className");
+	        	getModel().setName(in.getText());
+	        in.closeElement();
+	        drawClass();
+	        
+	        in.openElement("classAssociations");
+	        	for (int i = 0; i < in.getElementCount("assoc"); ++i) {
+	        		in.openElement("assoc");
+			        	in.openElement("assocType");	
+			        		String assocText = in.getText();
+			        		AssociationType assocType;	// work-around for recurring enum issue...
+			        		if (assocText.equals("Inheritance")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Implementation")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Aggregation")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Composition")) assocType = AssociationType.Inheritance;
+			        		else if (assocText.equals("Dependency")) assocType = AssociationType.Inheritance;
+			        		else assocType = AssociationType.Inheritance;
+			        	in.closeElement();
+			        	in.openElement("assocTarget");
+			        		String assocTarget = in.getText();
+			        	in.closeElement();
+		        	in.closeElement();
+		        	getModel().addAssociation(assocTarget, assocType);
+	        	}
+	        in.closeElement();
+	        
+	        in.openElement("classAttributes");
+		        for(int i = 0; i < in.getElementCount("attr"); ++i) {
+		        	in.openElement("attr");
+		        		boolean attrStatic = in.getAttribute("attrStaticFlag", false);
+		        		readAttributes(in);
+			        	in.openElement("attrAccessModifier");
+			        		AccessModifier attrAccessMod;
+				        	String attrAccessModText = in.getText();	// workaround for enum issue
+				        	if (attrAccessModText.equals("+")) attrAccessMod = AccessModifier.Public;
+				        	else if (attrAccessModText.equals("-")) attrAccessMod = AccessModifier.Private;
+				        	else attrAccessMod = AccessModifier.Protected;
+			        	in.closeElement();
+			        	
+			        	in.openElement("attrName");
+			        		String attrName = in.getText();
+			        	in.closeElement();
+			        	
+			        	in.openElement("attrType");
+			        		String attrType = in.getText();
+			        	in.closeElement();
+		        	in.closeElement();
+		        	UmlAttributeModel attrModel = new UmlAttributeModel(attrAccessMod, attrName, attrType);
+		        	attrModel.setStaticFlag(attrStatic);
+		        	//getModel().addAttribute(attrModel);
+		        	drawAttribute(attrModel);
+		        }
+	        in.closeElement();
+	        
+	        in.openElement("methods");
+	        List<UmlMethodModel> methods = new ArrayList<UmlMethodModel>();
+	        for(int i = 0; i < in.getElementCount("method"); ++i) {
+	        	in.openElement("method");
+	        		boolean methodAbstract = in.getAttribute("methodAbstractFlag", false);
+	        		boolean methodStatic = in.getAttribute("methodStaticFlag", false);
+	        		readAttributes(in);
+		        	in.openElement("methodAccessModifier");
+		        		AccessModifier methodAccessMod;
+			        	String methodAccessModText = in.getText();	// workaround for enum issue
+			        	if (methodAccessModText.equals("+")) methodAccessMod = AccessModifier.Public;
+			        	else if (methodAccessModText.equals("-")) methodAccessMod = AccessModifier.Private;
+			        	else methodAccessMod = AccessModifier.Protected;
+		        	in.closeElement();
+		        	
+		        	in.openElement("methodType");
+		        		String methodType = in.getText();
+		        	in.closeElement();
+		        	
+		        	in.openElement("methodName");
+		        		String methodName = in.getText();
+		        	in.closeElement();
+		        	
+		        	in.openElement("params");
+		        	List<UmlAttributeModel> methodParams = new ArrayList<UmlAttributeModel>();
+			        	for (int j = 0; j < in.getElementCount("param"); ++j) {
+			        		in.openElement("param");
+				        		in.openElement("paramType");
+				        			String paramType = in.getText();
+				        		in.closeElement();
+				        		
+				        		in.openElement("paramName");
+				        			String paramName = in.getText();
+				        		in.closeElement();
+				        	in.closeElement();
+			        		methodParams.add(new UmlAttributeModel(null, paramName, paramType));
+			        	}
+		        	in.closeElement();
+	        	in.closeElement();
+	        	UmlMethodModel methodModel = new UmlMethodModel(methodAccessMod, methodType, methodName, methodParams);
+	        	methodModel.setAbstractFlag(methodAbstract);
+	        	methodModel.setStaticFlag(methodStatic);
+	        	methods.add(methodModel);
+	        	drawMethod(methodModel);
+	        }
+	        in.closeElement();
+	        getModel().setMethods(methods);
+        in.closeElement();
+        this.changed();
+    }
+        
+    @Override
     public Collection<Action> getActions(Point2D.Double p) {
-    	Collection<Action> actions = new ArrayList<Action>();
-    	actions.add(new AbstractAction(AssociationType.Aggregation.toString()) {
+    	// check if our child compartments contained the right-click (check null for testability workaround)
+    	if (p != null) {
+    		if(getAttributesCompartment().contains(p)) {
+        		for(Figure attrFigure : getAttributesCompartment().getChildren()) {
+        			if (attrFigure.contains(p)) return ((AttributeFigure)attrFigure).getActions(p);
+        		}
+        	}
+        	else if(getMethodsCompartment().contains(p)) {
+        		for(Figure methodFigure : getMethodsCompartment().getChildren()) {
+        			if (methodFigure .contains(p)) return ((MethodFigure)methodFigure ).getActions(p);
+        		}
+        	}    		
+    	}    	
+    	// otherwise use actions from self
+    	Collection<Action> actions = new ArrayList<Action>();    	
+    	actions.add(new AbstractAction("Toggle Interface") {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				willChange();
+				model.setInterfaceFlag(!model.getInterfaceFlag());
+				// if is interface, abstract is redundant and the methods cannot be abstract or static
+				if (model.getInterfaceFlag()) {
+					model.setAbstractFlag(false);
+					for (UmlMethodModel method : model.getMethods()){
+						method.setStaticFlag(false);
+						method.setAbstractFlag(false);
+					}
+					getNameFigure().set(AttributeKeys.FONT_ITALIC, false);
+				}
+				getNameFigure().setText(getNameFigure().getText());
+				changed();
+			}
+    	});
+    	actions.add(new AbstractAction("Toggle Abstract") {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				willChange();
+				model.setAbstractFlag(!model.getAbstractFlag());
+				model.setInterfaceFlag(false);
+				getNameFigure().set(AttributeKeys.FONT_ITALIC, model.getAbstractFlag());
+				getNameFigure().setText(getNameFigure().getText());
+				changed();
+			}
+    	});
+    	
+    	actions.add(new AbstractAction("Add Attribute") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				// change end decoration to white diamond
-				set(STROKE_DASHES, null);
-				set(END_DECORATION, new ArrowTip(1, 20.0 , 20.0, false, true, true));
-				associationModel.setType(AssociationType.Aggregation);
-				
-				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				UmlAttributeModel attrModel = new UmlAttributeModel(AccessModifier.Private, "newAttribute", "Object");
+				String attrFigureText = attrModel.getAccessModifier().getSymbol() + " " + attrModel.getName() + " : " + attrModel.getType();
+				getAttributesCompartment().add(new AttributeFigure(attrFigureText, model, attrModel));
 		        changed();
 			}
     	});
-    	actions.add(new AbstractAction(AssociationType.Association.toString()) {
+    	actions.add(new AbstractAction("Add Method") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				willChange();
-				// change end decoration to no arrow
-				set(STROKE_DASHES, null);
+				UmlMethodModel methodModel = new UmlMethodModel(AccessModifier.Public, "Object", "newMethod", new ArrayList<UmlAttributeModel>());
 				
-				set(START_DECORATION, null);
-				if(isBidirectional) set(END_DECORATION, null);
-				else set(END_DECORATION, new ArrowTip());
-				associationModel.setType(AssociationType.Association);
-	        	changed();
-			}
-    	});
-    	actions.add(new AbstractAction(AssociationType.Implementation.toString()) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(!startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) {
-					willChange();
-					// change end decoration to white arrow
-					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, true, false, true));
-					set(STROKE_DASHES, DASH_PATTERN);					
-					associationModel.setType(AssociationType.Implementation);
-					
-					// destroy bidirectional
-					endFigure.getModel().removeAssociation(startFigure.getModel());
-					isBidirectional = false;
-					set(START_DECORATION, null);
-		        	changed();
-				}
-			}
-    	});
-    	actions.add(new AbstractAction(AssociationType.Inheritance.toString()) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(!startFigure.getModel().hasInheritanceCycle(endFigure.getModel())) {
-					willChange();
-					// change end decoration to white arrow
-					set(STROKE_DASHES, null);
-					set(END_DECORATION, new ArrowTip(0.35, 20.0 , 10.0, false, true, true));
-					associationModel.setType(AssociationType.Inheritance);
-					
-					// destroy bidirectional
-					endFigure.getModel().removeAssociation(startFigure.getModel());
-					isBidirectional = false;
-					set(START_DECORATION, null);
-		        	changed();
-				}
-			}
-    	});
-    	actions.add(new AbstractAction(AssociationType.Dependency.toString()) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				willChange();
-				// change end decoration to default small arrow
-				set(STROKE_DASHES, DASH_PATTERN);
-				set(END_DECORATION, new ArrowTip());
-				associationModel.setType(AssociationType.Dependency);
+		    	String methodFigureText = methodModel.getAccessModifier().getSymbol() + " " + methodModel.getName() + "(";
+		    	for (int i = 0; i < methodModel.getParameters().size(); ++i) {
+		    		if ( i == methodModel.getParameters().size() - 1)
+		    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType();
+		    		else
+		    			methodFigureText+= methodModel.getParameters().get(i).getName() + " : " + methodModel.getParameters().get(i).getType() + ", ";
+		    	}
+		    	methodFigureText += ") : " + methodModel.getReturnType();
 				
-				if(isBidirectional) set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
+				getMethodsCompartment().add(new MethodFigure(methodFigureText, model, methodModel, getNameFigure()));
 	        	changed();
 			}
     	});
-    	actions.add(new AbstractAction("Bidirectional") {
+    	
+    	actions.add(new AbstractAction("Generate Code Skeleton File") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				willChange();
-				// don't allow setting to toggle if association is inheritance/implementation
-				if(associationModel.getType() != AssociationType.Inheritance && associationModel.getType() != AssociationType.Implementation) {
-					isBidirectional = !isBidirectional;
-				}				
-				// change start decoration to matching small arrow
-				if(isBidirectional) {
-					if (associationModel.getType() == AssociationType.Association) {
-						set(START_DECORATION, null);
-						set(END_DECORATION, null);
-					}
-					set(START_DECORATION, AssociationFigure.this.get(END_DECORATION));
-					endFigure.getModel().addAssociation(startFigure.getModel().getName(), associationModel.getType());
-				}			
-				else {
-					set(START_DECORATION, null);
-					endFigure.getModel().removeAssociation(startFigure.getModel());
-					if (associationModel.getType() == AssociationType.Association) {
-						set(END_DECORATION, new ArrowTip());
-					}
+				String output = getModel().toString();
+				String fileName = (model.getName() + ".java");
+
+				try {
+					PrintWriter outStream = new PrintWriter(fileName);
+
+					outStream.write(output);
+					outStream.close();
+				
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
 				}
-	        	changed();
 			}
     	});
-    	return actions;
+    	
+    	return actions;        
     }
 }
