@@ -420,7 +420,7 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
         	}    		
     	}    	
     	// otherwise use actions from self
-    	Collection<Action> actions = new ArrayList<Action>();    	
+    	Collection<Action> actions = new ArrayList<Action>();
     	actions.add(new AbstractAction("Toggle Interface") {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -434,6 +434,13 @@ public class UmlClassFigure extends GraphicalCompositeFigure {
 						method.setAbstractFlag(false);
 					}
 					getNameFigure().set(AttributeKeys.FONT_ITALIC, false);
+					for (Figure f : getMethodsCompartment().getChildren()) {
+						MethodFigure methodFigure = (MethodFigure)f;
+						methodFigure.willChange();
+						methodFigure.set(AttributeKeys.FONT_ITALIC, false);
+						methodFigure.set(AttributeKeys.FONT_UNDERLINE, false);
+						methodFigure.changed();
+					}
 				}
 				getNameFigure().setText(getNameFigure().getText());
 				changed();
