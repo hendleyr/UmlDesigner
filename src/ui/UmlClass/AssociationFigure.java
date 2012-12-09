@@ -29,9 +29,6 @@ import domain.UmlClass.UmlAssociationModel;
 public class AssociationFigure extends LabeledLineConnectionFigure {
 	private static final double[] DASH_PATTERN = new double[] {10};
 	
-	// layout thoughts: multiplicities above the line near the arrow, roles below the line near the arrow,
-	//					relationship above the line centered horizontally
-	
 	private MultiplicityFigure sMult;
 	private MultiplicityFigure eMult;
 	
@@ -63,8 +60,7 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
         setAttributeEnabled(END_DECORATION, true);
         setAttributeEnabled(START_DECORATION, true);
         setAttributeEnabled(STROKE_DASHES, true);
-        
-        // TODO: move instantiation of role/multiplicities to handleConnect()/actions? private methods for changing association type?     
+         
         setLayouter(new LocatorLayouter());
     }
 
@@ -340,13 +336,129 @@ public class AssociationFigure extends LabeledLineConnectionFigure {
     	return actions;
     }
     
-//    @Override
-//    public void read(DOMInput in) throws IOException {
-//    	
-//    }
-//    
-//    @Override
-//    public void write(DOMOutput out) throws IOException {
-//    	
-//    }
+    @Override
+    public void read(DOMInput in) throws IOException {
+    	super.read(in);
+    	isBidirectional = in.getAttribute("isBidirectional", false);
+    	in.openElement("assocModel");
+			String assocType = in.getAttribute("type", "Dependecy");
+			if (assocType.equals(AssociationType.Aggregation.toString()))
+				associationModel.setType(AssociationType.Aggregation);
+			else if (assocType.equals(AssociationType.Association.toString()))
+				associationModel.setType(AssociationType.Association);
+			else if (assocType.equals(AssociationType.Dependency.toString()))
+				associationModel.setType(AssociationType.Dependency);
+			else if (assocType.equals(AssociationType.Implementation.toString()))
+				associationModel.setType(AssociationType.Implementation);
+			else if (assocType.equals(AssociationType.Inheritance.toString()))
+				associationModel.setType(AssociationType.Inheritance);
+			associationModel.setTarget(in.getAttribute("target", "newClass"));
+			if (associationModel.getType() == AssociationType.Aggregation || associationModel.getType() == AssociationType.Association) {
+				associationModel.setRoleName(in.getAttribute("role", "startRole"));
+
+	            startRole = new RoleFigure(associationModel.getRoleName(), associationModel);	            
+	            startRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, 0));
+	            add(startRole);
+				if (associationModel.getType() == AssociationType.Association) {
+					associationModel.setMultiplicity(in.getAttribute("mult", "1"));
+					
+		            sMult = new MultiplicityFigure(in.getAttribute("mult", "1"), associationModel);
+		            sMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, 0));
+		            add(sMult);
+				}				
+			}
+    	in.closeElement();
+    	if (isBidirectional) {
+        	in.openElement("bidirectionalAssocModel");
+        			assocType = in.getAttribute("type", "Dependecy");
+        		if (assocType.equals(AssociationType.Aggregation.toString()))
+        			bidirectionalAssocModel.setType(AssociationType.Aggregation);
+        		else if (assocType.equals(AssociationType.Association.toString()))
+        			bidirectionalAssocModel.setType(AssociationType.Association);
+				else if (assocType.equals(AssociationType.Dependency.toString()))
+					bidirectionalAssocModel.setType(AssociationType.Dependency);
+				else if (assocType.equals(AssociationType.Implementation.toString()))
+					bidirectionalAssocModel.setType(AssociationType.Implementation);
+				else if (assocType.equals(AssociationType.Inheritance.toString()))
+					bidirectionalAssocModel.setType(AssociationType.Inheritance);
+        		bidirectionalAssocModel.setTarget(in.getAttribute("target", "newClass"));
+    			if (bidirectionalAssocModel.getType() == AssociationType.Aggregation || associationModel.getType() == AssociationType.Association) {
+    				bidirectionalAssocModel.setRoleName(in.getAttribute("role", "endRole"));
+    				endRole = new RoleFigure(bidirectionalAssocModel.getRoleName(), bidirectionalAssocModel);
+    	            endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
+    	            add(endRole);
+    				if (bidirectionalAssocModel.getType() == AssociationType.Association) {
+    					bidirectionalAssocModel.setMultiplicity(in.getAttribute("mult", "1"));
+    		            eMult = new MultiplicityFigure(bidirectionalAssocModel.getMultiplicity(), bidirectionalAssocModel);
+    		            eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
+    		            add(eMult);
+    				}
+    			}
+        	in.closeElement();
+    	}
+	    
+    	if (eMult == null && associationModel.getType() == AssociationType.Association) {
+			in.openElement("eMult");
+	            eMult = new MultiplicityFigure(in.getText(), bidirectionalAssocModel);
+	            eMult.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(-5, .9));
+	            add(eMult);
+    		in.closeElement();
+    	}    	
+		
+    	if (associationModel.getType() == AssociationType.Association || associationModel.getType() == AssociationType.Aggregation) {
+    		in.openElement("relationship");
+		        relationship = new TextFigure(in.getText());
+		        relationship.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .5));
+		        add(relationship);
+	        in.closeElement();
+    	}
+    	
+    	if (endRole == null && associationModel.getType() == AssociationType.Association || associationModel.getType() == AssociationType.Aggregation) {
+	    	in.openElement("endRole");
+				endRole = new RoleFigure(in.getText(), bidirectionalAssocModel);
+	            endRole.set(LocatorLayouter.LAYOUT_LOCATOR, new AnnotationLocator(5, .9));
+	            add(endRole);
+	    	in.closeElement();
+    	}
+    }
+    
+    @Override
+    public void write(DOMOutput out) throws IOException {
+    	super.write(out);
+    	out.addAttribute("isBidirectional", isBidirectional);
+    	out.openElement("assocModel");
+    		out.addAttribute("type", associationModel.getType().toString());
+    		out.addAttribute("target", associationModel.getTarget());
+    		out.addAttribute("role", associationModel.getRoleName());
+    		out.addAttribute("mult", associationModel.getMultiplicity());
+    	out.closeElement();
+    	if(isBidirectional) {
+        	out.openElement("bidirectionalAssocModel");
+    			out.addAttribute("type", bidirectionalAssocModel.getType().toString());
+    			out.addAttribute("target", bidirectionalAssocModel.getTarget());
+    			out.addAttribute("role", bidirectionalAssocModel.getRoleName());
+    			out.addAttribute("mult", bidirectionalAssocModel.getMultiplicity());
+        	out.closeElement();
+    	}
+
+//    	out.openElement("sMult");
+//        	if(sMult != null) out.addText(sMult.getText());
+//    	out.closeElement();
+	    	
+    	out.openElement("eMult");
+    		if(eMult != null) out.addText(eMult.getText());
+    	out.closeElement();
+    	
+    	out.openElement("relationship");
+        	if(relationship != null) out.addText(relationship.getText());
+    	out.closeElement();
+    	
+//    	out.openElement("startRole");
+//        	if(startRole != null)out.addText(startRole.getText());
+//    	out.closeElement();
+    	
+    	out.openElement("endRole");
+        	if(endRole != null) out.addText(endRole.getText());
+    	out.closeElement();    	
+    }
 }
